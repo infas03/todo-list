@@ -12,12 +12,10 @@ import { link as linkStyles } from "@heroui/theme";
 import clsx from "clsx";
 import { useLocation } from "react-router-dom";
 import { Button } from "@heroui/button";
-
-import { siteConfig } from "@/config/site";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { GithubIcon, LinkedInIcon } from "@/components/icons";
-import { Logo } from "@/components/icons";
-import { useAuth } from "@/context/authContext";
+import { useAuth } from "../context/AuthProvider";
+import { GithubIcon, LinkedInIcon, Logo } from "./icons";
+import { siteConfig } from "../config/site";
+import { ThemeSwitch } from "./theme-switch";
 
 export const Navbar = () => {
   const location = useLocation();
