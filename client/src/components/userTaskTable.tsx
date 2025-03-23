@@ -12,11 +12,11 @@ import { Alert, Checkbox, Chip, Select, SelectItem } from "@heroui/react";
 
 import { FilterSwitch } from "./filterSwitch";
 
-import { Task } from "@/types";
-import api from "@/services/api";
-import { taskFilter, userTaskTableColumns } from "@/config/staticValue";
-import { useAuth } from "@/context/authContext";
 import { EmployerTableSkeleton } from "./skeleton/employerTableSkeleton";
+import { Task } from "../types";
+import { useAuth } from "../context/AuthProvider";
+import api from "../services/api";
+import { taskFilter, userTaskTableColumns } from "../config/staticValue";
 
 export const UserTaskTable = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
