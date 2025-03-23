@@ -3,6 +3,10 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { ROLES } from "../constants/role";
 import { useAuth } from "../context/AuthProvider";
 import { ProtectedRoute } from "./protectedRoute";
+import Admin from "../pages/adminPage";
+import User from "../pages/userPage";
+import Login from "../pages/loginPage";
+import AdminUsersPage from "../pages/adminUsersPage";
 
 const AppRoutes = () => {
   const { isLoggedIn, role, resolved } = useAuth();
@@ -26,10 +30,10 @@ const AppRoutes = () => {
             isAllowed={isLoggedIn && role === ROLES.ADMIN}
             redirectPath="/"
           >
-            <Employees />
+            <AdminUsersPage />
           </ProtectedRoute>
         }
-        path="/employees"
+        path="/users"
       />
 
       <Route element={<Navigate to="/" />} path="*" />
