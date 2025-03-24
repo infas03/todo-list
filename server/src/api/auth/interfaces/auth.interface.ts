@@ -1,7 +1,12 @@
-import { IUser } from "../../../core/database/models/user.model";
+import { IUser, UserRole } from "../../../core/database/models/user.model";
 
 export interface AuthResponse {
-  user: Omit<IUser, 'password'>;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    roles: UserRole[];
+  };
   token: string;
 }
 
