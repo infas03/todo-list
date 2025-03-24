@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { TaskService } from '../services/task.service';
 import { TaskRepository } from '../repositories/task.repository';
 import { CreateTaskDto, UpdateTaskDto } from '../dtos/create-task.dto';
