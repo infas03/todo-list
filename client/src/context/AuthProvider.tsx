@@ -5,10 +5,12 @@ import {
   ReactNode,
   useEffect,
 } from "react";
+import { useSelector } from "react-redux";
+
 import { Role } from "../constants/role";
 import { User } from "../types";
-import { useSelector } from "react-redux";
-import { selectUserDetails } from "../redux/slices/userSlice";
+
+import { RootState } from "@/redux/store";
 
 type AuthContextType = {
   isLoggedIn: boolean;
@@ -27,7 +29,9 @@ type AuthProviderProps = {
 };
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const userDetailsState = useSelector(selectUserDetails);
+  const userDetailsState = useSelector(
+    (state: RootState) => state.user.userDetails,
+  );
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [role, setRole] = useState<string | null>(null);

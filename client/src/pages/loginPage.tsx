@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { Form, Input, Button } from "@heroui/react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { ThunkDispatch } from "redux-thunk";
+import { AnyAction } from "redux";
 
 import {
   EyeFilledIcon,
@@ -10,13 +14,17 @@ import {
 } from "../components/icons";
 import { useAuth } from "../context/AuthProvider";
 import { LoginFormData } from "../types";
-import api from "../services/api";
 import DefaultLayout from "../layouts/default";
 
+import { RootState } from "@/redux/store";
+import { userLogin } from "@/redux/actions/userAction";
+
 export default function Login() {
+  const dispatch: ThunkDispatch<RootState, unknown, AnyAction> = useDispatch();
+  const navigate = useNavigate();
+
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
 
   const toggleVisibility = () => setIsPasswordVisible(!isPasswordVisible);
@@ -24,28 +32,16 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
 
     const data = Object.fromEntries(
-      new FormData(e.currentTarget)
+      new FormData(e.currentTarget),
     ) as unknown as LoginFormData;
 
     try {
-      const response = await api.post("/v1/auth/login", data);
-
-      if (response.data.success) {
-        const { token, data } = response.data;
-
-        login(token, data.role, data);
-      } else {
-        setError("Login failed. Please try again.");
-      }
+      dispatch(userLogin(data, navigate, login));
     } catch (error) {
-      if (error instanceof Error) {
-        setError("Invalid credentials.");
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
+      // eslint-disable-next-line no-console
+      console.error("Error logging in:", error);
     } finally {
       setIsLoading(false);
     }
@@ -105,11 +101,6 @@ export default function Login() {
             type={isPasswordVisible ? "text" : "password"}
             variant="bordered"
           />
-          {error && (
-            <div className="w-full text-center text-sm text-red-500">
-              {error}
-            </div>
-          )}
           <div className="flex gap-2 w-full">
             <Button
               className="w-full h-12 font-medium text-base"
