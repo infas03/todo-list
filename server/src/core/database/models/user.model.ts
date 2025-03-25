@@ -8,7 +8,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   name: string;
-  roles: UserRole[];
+  role: string;
   tasks: Schema.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
@@ -28,17 +28,16 @@ const userSchema = new Schema<IUser>({
     type: String, 
     required: true,
     minlength: 8,
-    select: false
   },
   name: { 
     type: String, 
     required: true,
     trim: true
   },
-  roles: {
-    type: [String],
-    enum: ['USER', 'ADMIN'],
-    default: ['USER'],
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
     required: true
   },
   tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }]
@@ -62,21 +61,5 @@ userSchema.pre('save', async function(next) {
     next(error as Error);
   }
 });
-
-userSchema.methods.hasRole = function(role: UserRole): boolean {
-  return this.roles.includes(role);
-};
-
-userSchema.methods.addRole = function(role: UserRole) {
-  if (!this.roles.includes(role)) {
-    this.roles.push(role);
-  }
-  return this.save();
-};
-
-userSchema.methods.removeRole = function(role: UserRole) {
-  this.roles = this.roles.filter((r: string) => r !== role);
-  return this.save();
-};
 
 export const User: Model<IUser> = model<IUser>('User', userSchema);

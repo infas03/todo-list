@@ -76,10 +76,7 @@ export const Navbar = () => {
           <ThemeSwitch />
         </NavbarItem>
         <NavbarItem className="flex flex-col text-xs">
-          <span className="font-medium">
-            {userDetails?.firstName} {userDetails?.lastName}
-          </span>
-          <span className="text-gray-400">{userDetails?.department}</span>
+          <span className="font-medium capitalize">{userDetails?.name}</span>
         </NavbarItem>
         {isLoggedIn && (
           <NavbarItem>

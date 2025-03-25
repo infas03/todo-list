@@ -12,12 +12,9 @@ export interface User {
 
 export interface User {
   id?: number;
-  firstName: string;
-  lastName: string;
-  username: string;
-  password: string;
-  department: string;
-  finishedTasks?: number;
+  name: string;
+  email: string;
+  role: string;
   totalTasks?: number;
 }
 

@@ -65,14 +65,14 @@ export default function Login() {
           </div>
           <Input
             isRequired
-            errorMessage="Please enter a valid username"
-            label="Username"
-            name="username"
-            placeholder="Enter username"
+            errorMessage="Please enter a valid Email"
+            label="Email"
+            name="email"
+            placeholder="Enter email address"
             startContent={
               <UserIcon className="text-xl text-default-400 pointer-events-none flex-shrink-0" />
             }
-            type="text"
+            type="email"
             variant="bordered"
           />
           <Input

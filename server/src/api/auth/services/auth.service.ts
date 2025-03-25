@@ -18,7 +18,6 @@ export class AuthService {
     if (!user || !(await comparePassword(data.password, user.password))) {
       throw new Error('Invalid credentials');
     }
-    
     const token = signToken({ userId: user._id });
     return { user, token };
   }

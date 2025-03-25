@@ -1,11 +1,8 @@
-import { AnyAction, ThunkAction, ThunkDispatch } from "@reduxjs/toolkit";
-
-import ToastBar from "../../components/toastbar";
+import ToastBar from "../../components/toastBar";
 import api from "../../services/api";
-
-import { Role } from "@/constants/role";
-import { User } from "@/types";
 import { LoginInput } from "../types";
+import { Role } from "../..//constants/role";
+import { User } from "../../types/index";
 
 interface ApiError {
   response?: {
@@ -18,25 +15,38 @@ interface ApiError {
   message: string;
 }
 
+export const FETCH_USER_SUCCESS = "FETCH_USER_SUCCESS";
+export const LOGOUT_SUCCESS = "LOGOUT_SUCCESS";
+
+export const loginUserSuccess = (data: any) => ({
+  type: FETCH_USER_SUCCESS,
+  payload: data,
+});
+
+export const logoutUserSuccess = () => ({
+  type: LOGOUT_SUCCESS,
+});
+
 export const userLogin = (
   values: LoginInput,
   navigate: (path: string) => void,
-  login: (token: string, role: Role, userDetails: User) => void,
+  login: (token: string, role: Role, userDetails: User) => void
 ) => {
   return async (): Promise<void> => {
-    const inputData = {
-      email: values.email,
-      password: values.password,
-    };
-
     try {
-      const response = await api.post("/v1/auth/login", inputData);
+      const response = await api.post("/auth/login", values);
 
-      if (response.status === 200) {
+      if (response.data.success) {
+        console.log("response: ", response.data);
+
         ToastBar.success("Login successful");
         localStorage.setItem("token", response.data.token);
-        login(response.data.token, response.data.role, response.data.user);
-        navigate("/search-jobs");
+        login(
+          response.data.data.token,
+          response.data.data.user.role,
+          response.data.data.user,
+        );
+        navigate("/users");
       }
     } catch (error) {
       const apiError = error as ApiError;

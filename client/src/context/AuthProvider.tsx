@@ -5,12 +5,13 @@ import {
   ReactNode,
   useEffect,
 } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { Role } from "../constants/role";
 import { User } from "../types";
 
 import { RootState } from "@/redux/store";
+import { loginUserSuccess, logoutUserSuccess } from "@/redux/actions/userAction";
 
 type AuthContextType = {
   isLoggedIn: boolean;
@@ -29,6 +30,8 @@ type AuthProviderProps = {
 };
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const dispatch = useDispatch();
+
   const userDetailsState = useSelector(
     (state: RootState) => state.user.userDetails,
   );
@@ -48,14 +51,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setIsLoggedIn(true);
       setToken(storedToken);
       setRole(userDetailsState.role);
-      setUserDetails(userDetailsState ? userDetailsState : null);
+      setUserDetails(userDetailsState ? userDetailsState : null); 
     }
 
     setResolved(true);
   }, []);
 
   const login = (newToken: string, newRole: Role, newUserDetails: User) => {
+    console.log("newUserDetails: ", newUserDetails);
     localStorage.setItem("token", newToken);
+    dispatch(loginUserSuccess(newUserDetails));
     setToken(newToken);
     setRole(newRole);
     setUserDetails(newUserDetails);
@@ -64,6 +69,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = () => {
     localStorage.removeItem("token");
+    dispatch(logoutUserSuccess());
     setToken(null);
     setRole(null);
     setUserDetails(null);

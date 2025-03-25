@@ -1,11 +1,9 @@
-import { IUser, UserRole } from "../../../core/database/models/user.model";
-
 export interface AuthResponse {
   user: {
     id: string;
     email: string;
     name: string;
-    roles: UserRole[];
+    roles: string;
   };
   token: string;
 }
