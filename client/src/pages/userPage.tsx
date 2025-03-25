@@ -8,8 +8,8 @@ export default function User() {
 
   return (
     <DefaultLayout>
-      <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-        <div>
+      <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10 ">
+        <div className="min-w-[900px]">
           <h1 className="text-3xl font-bold">My Tasks</h1>
           <p className="text-lg text-gray-400">
             Manage and track your assigned tasks

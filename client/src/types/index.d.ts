@@ -5,13 +5,7 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
 };
 
 export interface User {
-  id: number;
-  name: string;
-  email: string;
-}
-
-export interface User {
-  id?: number;
+  _id?: number;
   name: string;
   email: string;
   role: string;
@@ -19,9 +13,9 @@ export interface User {
 }
 
 export interface AssignFormData {
-  name: string;
-  description: string;
+  title: string;
   priority: string;
+  description: string;
   dueDate: string;
 }
 
@@ -31,10 +25,10 @@ export interface LoginFormData {
 }
 
 export interface Task {
-  id?: number;
-  name: string;
+  _id?: string;
+  title: string;
+  status: string;
   description: string;
   priority: string;
   dueDate: string;
-  isCompleted: boolean;
 }

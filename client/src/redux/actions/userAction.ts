@@ -30,15 +30,13 @@ export const logoutUserSuccess = () => ({
 export const userLogin = (
   values: LoginInput,
   navigate: (path: string) => void,
-  login: (token: string, role: Role, userDetails: User) => void
+  login: (token: string, role: Role, userDetails: User) => void,
 ) => {
   return async (): Promise<void> => {
     try {
       const response = await api.post("/auth/login", values);
 
       if (response.data.success) {
-        console.log("response: ", response.data);
-
         ToastBar.success("Login successful");
         localStorage.setItem("token", response.data.token);
         login(

@@ -9,53 +9,47 @@ import {
   Input,
   Textarea,
   Form,
+  Select,
+  SelectItem,
 } from "@heroui/react";
-import { Autocomplete, AutocompleteItem } from "@heroui/autocomplete";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { ThunkDispatch } from "redux-thunk";
+import { AnyAction } from "redux";
 
-import { NotepadIcon } from "./icons";
-
-import api from "@/services/api";
 import { priorities } from "@/config/staticValue";
 import { AssignFormData } from "@/types";
+import { createTask } from "@/redux/actions/taskAction";
+import { RootState } from "@/redux/store";
 
-interface AssignTaskFormProps {
-  employeeId: number;
-}
+export const AssignTaskForm = () => {
+  const dispatch: ThunkDispatch<RootState, unknown, AnyAction> = useDispatch();
 
-export const AssignTaskForm = ({ employeeId }: AssignTaskFormProps) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async (
     e: React.FormEvent<HTMLFormElement>,
-    onClose: () => void,
+    onClose: () => void
   ) => {
     setError(null);
     e.preventDefault();
 
     const data = Object.fromEntries(
-      new FormData(e.currentTarget),
+      new FormData(e.currentTarget)
     ) as unknown as AssignFormData;
 
-    const taskData = {
-      ...data,
-      employeeId,
-    };
-
-    console.log("taskData: ", taskData);
+    console.log("taskData: ", data);
 
     try {
-      const response = await api.post("/v1/tasks", taskData);
-
-      if (response.data.success) {
-        onClose();
-      }
+      dispatch(createTask(data, onClose));
     } catch (error) {
       if (error instanceof Error) {
+        // eslint-disable-next-line no-console
         console.error("Error assigning task:", error.message);
         setError("Error assigning task, try again later!");
       } else {
+        // eslint-disable-next-line no-console
         console.error("Error assigning task");
         setError("Error assigning task, try again later!");
       }
@@ -64,9 +58,9 @@ export const AssignTaskForm = ({ employeeId }: AssignTaskFormProps) => {
 
   return (
     <>
-      <button className="text-blue-500 hover:text-blue-700" onClick={onOpen}>
-        <NotepadIcon />
-      </button>
+      <Button color="primary" onPress={onOpen}>
+        Add Task
+      </Button>
       <Modal isOpen={isOpen} placement="top-center" onOpenChange={onOpenChange}>
         <Form className="w-full" onSubmit={(e) => onSubmit(e, onOpenChange)}>
           <ModalContent>
@@ -78,10 +72,10 @@ export const AssignTaskForm = ({ employeeId }: AssignTaskFormProps) => {
                 <ModalBody>
                   <Input
                     isRequired
-                    errorMessage="Please enter a valid task name"
-                    label="Task Name"
-                    name="name"
-                    placeholder="Enter task name"
+                    errorMessage="Please enter a valid task title"
+                    label="Task Title"
+                    name="title"
+                    placeholder="Enter task title"
                     type="text"
                     variant="bordered"
                   />
@@ -93,21 +87,19 @@ export const AssignTaskForm = ({ employeeId }: AssignTaskFormProps) => {
                     placeholder="Enter task description"
                     variant="bordered"
                   />
-                  <Autocomplete
+                  <Select
                     isRequired
                     className="w-full"
-                    defaultItems={priorities}
+                    items={priorities}
                     label="Priority"
                     name="priority"
                     placeholder="Select priority"
                     variant="bordered"
                   >
                     {(item) => (
-                      <AutocompleteItem key={item.key}>
-                        {item.label}
-                      </AutocompleteItem>
+                      <SelectItem key={item.key}>{item.label}</SelectItem>
                     )}
-                  </Autocomplete>
+                  </Select>
                   <Input
                     isRequired
                     errorMessage="Please enter a valid due date"

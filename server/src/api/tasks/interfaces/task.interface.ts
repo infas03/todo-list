@@ -7,10 +7,8 @@ export enum TaskPriority {
 }
 
 export enum TaskStatus {
-  TODO = 'todo',
-  IN_PROGRESS = 'in_progress',
-  DONE = 'done',
-  BLOCKED = 'blocked'
+  NOT_DONE = 'not_done',
+  DONE = 'done'
 }
 
 export interface Recurrence {

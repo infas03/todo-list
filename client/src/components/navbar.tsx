@@ -79,6 +79,7 @@ export const Navbar = () => {
         </NavbarItem>
         <NavbarItem className="flex flex-col text-xs">
           <span className="font-medium capitalize">{userDetails?.name}</span>
+          <span className="capitalize text-gray-400">{userDetails?.role}</span>
         </NavbarItem>
         {isLoggedIn && (
           <NavbarItem>

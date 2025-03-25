@@ -25,7 +25,7 @@ const taskSchema = new Schema<ITask>({
   status: {
     type: String,
     enum: Object.values(TaskStatus),
-    default: TaskStatus.TODO
+    default: TaskStatus.NOT_DONE
   },
   priority: {
     type: String,

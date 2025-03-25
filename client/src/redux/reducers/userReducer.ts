@@ -1,7 +1,5 @@
-import { LOGOUT_SUCCESS } from "../actions/userAction";
+import { FETCH_USER_SUCCESS, LOGOUT_SUCCESS } from "../actions/userAction";
 import { UserState } from "../types";
-
-export const FETCH_USER_SUCCESS = "FETCH_USER_SUCCESS";
 
 const initialState: UserState = {
   userDetails: null,

@@ -28,7 +28,7 @@ export class TaskService {
   async createTask(data: CreateTaskDto, userId: string): Promise<TaskResponse> {
     const taskData = {
       ...data,
-      status: data.status || TaskStatus.TODO,
+      status: data.status || TaskStatus.NOT_DONE,
       priority: data.priority || TaskPriority.MEDIUM,
       user: userId,
       dependencies: data.dependencies || []
@@ -47,11 +47,7 @@ export class TaskService {
 
   async getUserTasks(
     userId: string, 
-    filters: {
-      status?: TaskStatus;
-      priority?: TaskPriority;
-      search?: string;
-    } = {}
+    filters: { mainFilter?: string; sortOrder?: string; search?: string } = {}
   ): Promise<TaskResponse[]> {
     const tasks = await this.taskRepo.findByUser(userId, filters);
     return tasks.map(this.toResponse);
@@ -77,7 +73,7 @@ export class TaskService {
       throw new Error('Task not found or unauthorized');
     }
 
-    if (updates.status === TaskStatus.DONE) {
+    if (updates.status === TaskStatus.NOT_DONE) {
       await this.validateTaskCompletion(id, userId);
     }
 
@@ -127,7 +123,7 @@ export class TaskService {
         ...task.toObject(),
         title: taskObj.title,
         description: taskObj.description,
-        status: TaskStatus.TODO,
+        status: TaskStatus.NOT_DONE,
         priority: taskObj.priority,
         dueDate: taskObj.dueDate,
         dependencies: taskObj.dependencies || [],

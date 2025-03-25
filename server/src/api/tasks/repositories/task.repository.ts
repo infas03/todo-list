@@ -1,21 +1,15 @@
-import { Task } from '../../../core/database/models/task.model';
-import { 
-  CreateTaskDto, 
-  UpdateTaskDto 
-} from '../dtos/create-task.dto';
-import { 
-  TaskStatus,
-  TaskPriority
-} from '../interfaces/task.interface';
-import { FilterQuery, QueryOptions } from 'mongoose';
+import { Task } from "../../../core/database/models/task.model";
+import { CreateTaskDto, UpdateTaskDto } from "../dtos/create-task.dto";
+import { TaskStatus, TaskPriority } from "../interfaces/task.interface";
+import { FilterQuery, QueryOptions } from "mongoose";
 
 export class TaskRepository {
   async create(taskData: CreateTaskDto & { user: string }) {
     return Task.create({
       ...taskData,
-      status: taskData.status || TaskStatus.TODO,
+      status: taskData.status || TaskStatus.NOT_DONE,
       priority: taskData.priority || TaskPriority.MEDIUM,
-      dependencies: taskData.dependencies || []
+      dependencies: taskData.dependencies || [],
     });
   }
 
@@ -23,16 +17,12 @@ export class TaskRepository {
     return Task.findById(id);
   }
 
-  async findByUser(userId: string, filters: {
-    status?: TaskStatus;
-    priority?: TaskPriority;
-    search?: string;
-  } = {}) {
+  async findByUser(
+    userId: string,
+    filters: { mainFilter?: string; sortOrder?: string, search?: string } = ({} = {})
+  ) {
     const query: FilterQuery<typeof Task> = { user: userId };
 
-    if (filters.status) query.status = filters.status;
-    if (filters.priority) query.priority = filters.priority;
-    
     if (filters.search) {
       query.$or = [
         { title: { $regex: filters.search, $options: 'i' } },
@@ -40,15 +30,27 @@ export class TaskRepository {
       ];
     }
 
-    return Task.find(query).sort({ dueDate: 1 });
+    const sort: any = {};
+
+    if (filters.mainFilter === "priority") {
+      sort["priority"] = filters.sortOrder === "asc" ? 1 : -1;
+    } else if (filters.mainFilter === "dueDate") {
+      sort["dueDate"] = filters.sortOrder === "asc" ? 1 : -1;
+    } else if (filters.mainFilter === "status") {
+      sort["status"] = filters.sortOrder === "asc" ? 1 : -1;
+    } else {
+      sort["dueDate"] = filters.sortOrder === "asc" ? 1 : -1;
+    }
+
+    return Task.find(query).sort(sort);
   }
 
   async update(id: string, updates: UpdateTaskDto) {
     const options: QueryOptions = { new: true };
-    
+
     if (updates.recurrence === null) {
       return Task.findByIdAndUpdate(
-        id, 
+        id,
         { $unset: { recurrence: 1 }, ...updates },
         options
       );
@@ -63,30 +65,29 @@ export class TaskRepository {
 
   async findTasksWithDependencies(dependencyIds: string[]) {
     return Task.find({
-      _id: { $in: dependencyIds }
+      _id: { $in: dependencyIds },
     });
   }
 
   async findRecurringTasksDue(thresholdDate: Date) {
     return Task.find({
-      'recurrence.nextOccurrence': { $lte: thresholdDate }
+      "recurrence.nextOccurrence": { $lte: thresholdDate },
     });
   }
 
   async updateTaskAndDependencies(
-    taskId: string, 
+    taskId: string,
     taskUpdates: UpdateTaskDto,
     dependencyUpdates: string[]
   ) {
     const session = await Task.startSession();
     try {
       session.startTransaction();
-      
-      const updatedTask = await Task.findByIdAndUpdate(
-        taskId, 
-        taskUpdates, 
-        { new: true, session }
-      );
+
+      const updatedTask = await Task.findByIdAndUpdate(taskId, taskUpdates, {
+        new: true,
+        session,
+      });
 
       await Task.updateMany(
         { _id: { $in: dependencyUpdates } },

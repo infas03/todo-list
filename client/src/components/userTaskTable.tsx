@@ -8,24 +8,40 @@ import {
   getKeyValue,
 } from "@heroui/table";
 import { useEffect, useState } from "react";
-import { Alert, Checkbox, Chip, Select, SelectItem } from "@heroui/react";
+import {
+  Alert,
+  Checkbox,
+  Chip,
+  Input,
+  Select,
+  SelectItem,
+} from "@heroui/react";
+import { useDispatch, useSelector } from "react-redux";
+import { ThunkDispatch } from "redux-thunk";
+import { AnyAction } from "redux";
 
-import { FilterSwitch } from "./filterSwitch";
-
-import { EmployerTableSkeleton } from "./skeleton/employerTableSkeleton";
-import { Task } from "../types";
 import { useAuth } from "../context/AuthProvider";
 import api from "../services/api";
 import { taskFilter, userTaskTableColumns } from "../config/staticValue";
+import { Task } from "../types";
+
+import { EmployerTableSkeleton } from "./skeleton/employerTableSkeleton";
+import { FilterSwitch } from "./filterSwitch";
+import { AssignTaskForm } from "./assignTaskForm";
+
+import { RootState } from "@/redux/store";
+import { getAllTasks } from "@/redux/actions/taskAction";
 
 export const UserTaskTable = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [totalTasks, setTotalTasks] = useState(0);
-  const [finishedTasks, setFinishedTasks] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const dispatch: ThunkDispatch<RootState, unknown, AnyAction> = useDispatch();
 
+  const task = useSelector((state: RootState) => state.task);
+
+  console.log("tasks: ", task);
+  const [isLoading, setIsLoading] = useState(true);
   const [mainFilter, setMainFilter] = useState<string | undefined>("dueDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { userDetails } = useAuth();
 
@@ -37,20 +53,13 @@ export const UserTaskTable = () => {
 
       if (mainFilter) queryParams.append("mainFilter", mainFilter);
       if (sortOrder) queryParams.append("sortOrder", sortOrder);
+      if (searchTerm) queryParams.append("search", searchTerm);
 
       if (!userDetails) {
         throw new Error("User details are not available");
       }
 
-      const response = await api.get(
-        `/v1/tasks/${userDetails.id}?${queryParams.toString()}`
-      );
-
-      if (response?.data.success) {
-        setTasks(response.data.data.tasks);
-        setTotalTasks(response.data.data.totalTasks);
-        setFinishedTasks(response.data.data.finishedTasks);
-      }
+      dispatch(getAllTasks(queryParams.toString()));
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error fetching tasks:", error);
@@ -61,7 +70,7 @@ export const UserTaskTable = () => {
 
   useEffect(() => {
     fetchTasks();
-  }, [userDetails?.id, mainFilter, sortOrder]);
+  }, [userDetails?._id, mainFilter, sortOrder]);
 
   const handleSortChange = (key: string) => {
     setMainFilter(key);
@@ -77,14 +86,14 @@ export const UserTaskTable = () => {
   };
 
   const handleCheckboxChange = async (
-    taskId: number,
-    currentStatus: boolean
+    taskId: string,
+    currentStatus: string
   ) => {
     try {
-      const updatedStatus = !currentStatus;
+      const updatedStatus = currentStatus === "done" ? "not_done" : "done";
 
-      const response = await api.put(`/v1/tasks/${taskId}`, {
-        isCompleted: updatedStatus,
+      const response = await api.put(`/tasks/${taskId}`, {
+        status: updatedStatus,
       });
 
       if (response.data.success) {
@@ -104,13 +113,34 @@ export const UserTaskTable = () => {
     }
   };
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      fetchTasks();
+    }
+  };
+
   return (
     <div className="p-4 w-full">
       <div className="flex justify-between items-center mb-4 text-sm">
         <h1 className="">
-          {totalTasks} active tasks, {finishedTasks} completed
+          {task?.totalTasks} active tasks, {task?.finishedTasks} completed
         </h1>
         <div className="flex items-center gap-x-2">
+          <Input
+            className="w-48"
+            name="search"
+            placeholder="Search Task"
+            type="text"
+            value={searchTerm}
+            variant="bordered"
+            onChange={handleSearchChange}
+            onKeyDown={handleKeyPress}
+          />
+          <AssignTaskForm />
           <span>Sort By:</span>
           <Select
             aria-label="Sort tasks by"
@@ -148,19 +178,20 @@ export const UserTaskTable = () => {
                   <TableColumn key={column.key}>{column.label}</TableColumn>
                 )}
               </TableHeader>
-              <TableBody items={tasks}>
-                {(item) => (
-                  <TableRow key={item.id}>
+              <TableBody items={task.tasks}>
+                {(item: Task) => (
+                  <TableRow key={item._id}>
                     {(columnKey) => (
                       <TableCell>
                         {columnKey === "priority" && (
                           <Chip
+                            className="capitalize"
                             color={
-                              item?.priority === "Low"
+                              item?.priority === "low"
                                 ? "default"
-                                : item?.priority === "Medium"
+                                : item?.priority === "medium"
                                   ? "warning"
-                                  : item?.priority === "High"
+                                  : item?.priority === "high"
                                     ? "danger"
                                     : "primary"
                             }
@@ -170,7 +201,7 @@ export const UserTaskTable = () => {
                         )}
                         {columnKey === "name" && (
                           <div className="max-w-[450px]">
-                            <div className="text-sm">{item?.name}</div>
+                            <div className="text-sm">{item?.title}</div>
                             <div className="text-xs">{item?.description}</div>
                           </div>
                         )}
@@ -201,17 +232,14 @@ export const UserTaskTable = () => {
                           <div className="">
                             <Checkbox
                               color="success"
-                              defaultSelected={item?.isCompleted}
+                              defaultSelected={item?.status === "done"}
                               onChange={() => {
-                                if (item.id !== undefined) {
-                                  handleCheckboxChange(
-                                    item.id,
-                                    item?.isCompleted
-                                  );
+                                if (item._id !== undefined) {
+                                  handleCheckboxChange(item._id, item?.status);
                                 }
                               }}
                             >
-                              {item?.isCompleted
+                              {item?.status === "done"
                                 ? "Completed"
                                 : "Mark as completed"}
                             </Checkbox>

@@ -75,4 +75,9 @@ export const taskFilter = [
     value: "priority",
     key: "priority",
   },
-]
+  {
+    label: "Status",
+    value: "status",
+    key: "status",
+  },
+];
