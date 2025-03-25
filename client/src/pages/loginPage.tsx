@@ -114,9 +114,9 @@ export default function Login() {
           </div>
           <div className="text-sm text-gray-400 text-center">
             <p className="text-gray-500">Demo Account</p>
-            <p>admin / password</p>
-            <p>infas / password</p>
-            <p>andy / password</p>
+            <p>admin@admin.com / password</p>
+            <p>infas@abc.com / password</p>
+            <p>andy@abc.com / password</p>
           </div>
         </Form>
       </section>

@@ -11,7 +11,10 @@ import { Role } from "../constants/role";
 import { User } from "../types";
 
 import { RootState } from "@/redux/store";
-import { loginUserSuccess, logoutUserSuccess } from "@/redux/actions/userAction";
+import {
+  loginUserSuccess,
+  logoutUserSuccess,
+} from "@/redux/actions/userAction";
 
 type AuthContextType = {
   isLoggedIn: boolean;
@@ -58,7 +61,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const login = (newToken: string, newRole: Role, newUserDetails: User) => {
-    console.log("newUserDetails: ", newUserDetails);
     localStorage.setItem("token", newToken);
     dispatch(loginUserSuccess(newUserDetails));
     setToken(newToken);
