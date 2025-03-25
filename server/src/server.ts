@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { config } from './core/config';
 import { logger } from './core/utils/logger';
 import { loadExpressApp } from './loaders/express';

@@ -1,28 +1,43 @@
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+
+export enum TaskPriority {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high'
+}
+
+export enum TaskStatus {
+  TODO = 'todo',
+  IN_PROGRESS = 'in_progress',
+  DONE = 'done',
+  BLOCKED = 'blocked'
+}
+
+export interface Recurrence {
+  pattern: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  nextOccurrence: Date;
+}
 
 export interface ITask extends Document {
   title: string;
   description?: string;
-  completed: boolean;
-  user: string;
-}
-
-export interface CreateTaskDto {
-  title: string;
-  description?: string;
-}
-
-export interface UpdateTaskDto {
-  title?: string;
-  description?: string;
-  completed?: boolean;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate?: Date;
+  recurrence?: Recurrence;
+  dependencies: Types.ObjectId[];
+  user: Types.ObjectId;
 }
 
 export interface TaskResponse {
   id: string;
   title: string;
   description?: string;
-  completed: boolean;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate?: Date;
+  recurrence?: Recurrence;
+  dependencies: string[];
   user: string;
   createdAt: Date;
   updatedAt: Date;
