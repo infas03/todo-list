@@ -22,3 +22,11 @@ export interface TaskInput {
   description: string;
   dueDate: string;
 }
+
+export interface UpdateTaskInput {
+  id?: string;
+  title: string;
+  priority: string;
+  description: string;
+  dueDate: string;
+}

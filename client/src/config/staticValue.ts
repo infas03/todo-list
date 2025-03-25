@@ -62,6 +62,10 @@ export const userTaskTableColumns = [
     key: "status",
     label: "Status",
   },
+  {
+    key: "action",
+    label: "Action",
+  },
 ];
 
 export const taskFilter = [

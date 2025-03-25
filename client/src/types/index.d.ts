@@ -13,6 +13,7 @@ export interface User {
 }
 
 export interface AssignFormData {
+  id?: string;
   title: string;
   priority: string;
   description: string;
@@ -25,7 +26,7 @@ export interface LoginFormData {
 }
 
 export interface Task {
-  _id?: string;
+  id?: string;
   title: string;
   status: string;
   description: string;

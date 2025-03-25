@@ -11,40 +11,38 @@ import { useState } from "react";
 
 import { DeleteIcon } from "./icons";
 
-import api from "@/services/api";
-
 interface DeleteConfirmationFormProps {
-  employeeId: number;
-  onEmployeeDeleted: () => void;
+  id: string;
+  entityName: string;
+  onConfirm: (id: string) => Promise<void>;
 }
 
 export const DeleteConfirmationForm = ({
-  employeeId,
-  onEmployeeDeleted,
+  id,
+  entityName,
+  onConfirm,
 }: DeleteConfirmationFormProps) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
     setError(null);
+    setIsDeleting(true);
 
     try {
-      const response = await api.delete(`/v1/employees/${employeeId}`);
-
-      if (response.data.success) {
-        onOpenChange();
-        onEmployeeDeleted();
-      }
+      await onConfirm(id);
+      onOpenChange();
     } catch (error) {
-      if (error instanceof Error) {
-        // eslint-disable-next-line no-console
-        console.error("Error deleting employee:", error.message);
-        setError("Error deleting employee, try again later!");
-      } else {
-        // eslint-disable-next-line no-console
-        console.error("Error deleting employee");
-        setError("Error deleting employee, try again later!");
-      }
+      const errorMessage =
+        error instanceof Error ? error.message : `Error deleting ${entityName}`;
+
+      setError(errorMessage);
+
+      // eslint-disable-next-line no-console
+      console.error(`Error deleting ${entityName}:`, errorMessage);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -61,20 +59,26 @@ export const DeleteConfirmationForm = ({
                 Confirm Deletion
               </ModalHeader>
               <ModalBody>
-                <p>Are you sure you want to delete this employee?</p>
+                <p>Are you sure you want to delete this {entityName}?</p>
                 {error && <p className="text-red-500">{error}</p>}
               </ModalBody>
               <ModalFooter>
                 <Button
                   color="danger"
+                  disabled={isDeleting}
                   type="button"
                   variant="flat"
                   onPress={onClose}
                 >
                   Cancel
                 </Button>
-                <Button color="primary" onPress={handleDelete}>
-                  Confirm Delete
+                <Button
+                  color="primary"
+                  disabled={isDeleting}
+                  isLoading={isDeleting}
+                  onPress={handleDelete}
+                >
+                  {isDeleting ? "" : "Confirm Delete"}
                 </Button>
               </ModalFooter>
             </>

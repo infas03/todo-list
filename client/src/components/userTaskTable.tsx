@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import {
   Alert,
+  Button,
   Checkbox,
   Chip,
   Input,
@@ -27,10 +28,11 @@ import { Task } from "../types";
 
 import { EmployerTableSkeleton } from "./skeleton/employerTableSkeleton";
 import { FilterSwitch } from "./filterSwitch";
-import { AssignTaskForm } from "./assignTaskForm";
+import { TaskForm } from "./taskForm";
 
 import { RootState } from "@/redux/store";
-import { getAllTasks } from "@/redux/actions/taskAction";
+import { deleteTask, getAllTasks } from "@/redux/actions/taskAction";
+import { DeleteConfirmationForm } from "./deleteConfirmationModal";
 
 export const UserTaskTable = () => {
   const dispatch: ThunkDispatch<RootState, unknown, AnyAction> = useDispatch();
@@ -87,7 +89,7 @@ export const UserTaskTable = () => {
 
   const handleCheckboxChange = async (
     taskId: string,
-    currentStatus: string
+    currentStatus: string,
   ) => {
     try {
       const updatedStatus = currentStatus === "done" ? "not_done" : "done";
@@ -118,8 +120,17 @@ export const UserTaskTable = () => {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       fetchTasks();
+    }
+  };
+
+  const handleDeleteEmployee = async (taskId: string) => {
+    console.log('delete ID: ', taskId)
+    try {
+      dispatch(deleteTask(taskId, fetchTasks));
+    } catch {
+      throw new Error("Failed to delete employee");
     }
   };
 
@@ -140,7 +151,7 @@ export const UserTaskTable = () => {
             onChange={handleSearchChange}
             onKeyDown={handleKeyPress}
           />
-          <AssignTaskForm />
+          <TaskForm mode="create" />
           <span>Sort By:</span>
           <Select
             aria-label="Sort tasks by"
@@ -180,7 +191,7 @@ export const UserTaskTable = () => {
               </TableHeader>
               <TableBody items={task.tasks}>
                 {(item: Task) => (
-                  <TableRow key={item._id}>
+                  <TableRow key={item.id}>
                     {(columnKey) => (
                       <TableCell>
                         {columnKey === "priority" && (
@@ -234,8 +245,8 @@ export const UserTaskTable = () => {
                               color="success"
                               defaultSelected={item?.status === "done"}
                               onChange={() => {
-                                if (item._id !== undefined) {
-                                  handleCheckboxChange(item._id, item?.status);
+                                if (item.id !== undefined) {
+                                  handleCheckboxChange(item.id, item?.status);
                                 }
                               }}
                             >
@@ -245,10 +256,21 @@ export const UserTaskTable = () => {
                             </Checkbox>
                           </div>
                         )}
+                        {columnKey === "action" && (
+                          <div className="flex items-center gap-x-2">
+                            <TaskForm mode="edit" task={item} />
+                            <DeleteConfirmationForm
+                              entityName="task"
+                              id={item.id!}
+                              onConfirm={handleDeleteEmployee}
+                            />
+                          </div>
+                        )}
                         {columnKey !== "name" &&
                           columnKey !== "status" &&
                           columnKey !== "dueDate" &&
                           columnKey !== "priority" &&
+                          columnKey !== "action" &&
                           getKeyValue(item, columnKey)}
                       </TableCell>
                     )}

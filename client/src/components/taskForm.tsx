@@ -12,54 +12,87 @@ import {
   Select,
   SelectItem,
 } from "@heroui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 
 import { priorities } from "@/config/staticValue";
-import { AssignFormData } from "@/types";
-import { createTask } from "@/redux/actions/taskAction";
+import { AssignFormData, Task } from "@/types";
+import { createTask, updateTask } from "@/redux/actions/taskAction";
 import { RootState } from "@/redux/store";
 
-export const AssignTaskForm = () => {
-  const dispatch: ThunkDispatch<RootState, unknown, AnyAction> = useDispatch();
+interface TaskFormProps {
+  mode?: "create" | "edit";
+  task?: Task;
+}
 
+export const TaskForm = ({ mode = "create", task }: TaskFormProps) => {
+  const dispatch: ThunkDispatch<RootState, unknown, AnyAction> = useDispatch();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState<Partial<AssignFormData>>({
+    id: "",
+    title: "",
+    description: "",
+    priority: "",
+    dueDate: "",
+  });
+
+  useEffect(() => {
+    if (mode === "edit" && task) {
+      setFormData({
+        id: task?.id,
+        title: task.title,
+        description: task.description || "",
+        priority: task.priority,
+        dueDate: task.dueDate?.split("T")[0] || "",
+      });
+    }
+  }, [mode, task]);
 
   const onSubmit = async (
     e: React.FormEvent<HTMLFormElement>,
-    onClose: () => void
+    onClose: () => void,
   ) => {
     setError(null);
     e.preventDefault();
 
     const data = Object.fromEntries(
-      new FormData(e.currentTarget)
+      new FormData(e.currentTarget),
     ) as unknown as AssignFormData;
 
-    console.log("taskData: ", data);
+    const updateData = {
+      ...data,
+      id: task?.id,
+    };
 
     try {
-      dispatch(createTask(data, onClose));
-    } catch (error) {
-      if (error instanceof Error) {
-        // eslint-disable-next-line no-console
-        console.error("Error assigning task:", error.message);
-        setError("Error assigning task, try again later!");
+      if (mode === "edit" && task) {
+        await dispatch(updateTask(updateData, onClose));
       } else {
-        // eslint-disable-next-line no-console
-        console.error("Error assigning task");
-        setError("Error assigning task, try again later!");
+        await dispatch(createTask(data, onClose));
       }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An error occurred";
+
+      setError(errorMessage);
+      // eslint-disable-next-line no-console
+      console.error(
+        `${mode === "edit" ? "Updating" : "Creating"} task failed:`,
+        errorMessage,
+      );
     }
   };
 
   return (
     <>
-      <Button color="primary" onPress={onOpen}>
-        Add Task
+      <Button
+        color={mode === "create" ? "primary" : "secondary"}
+        onPress={onOpen}
+      >
+        {mode === "edit" ? "Edit" : "Add Task"}
       </Button>
       <Modal isOpen={isOpen} placement="top-center" onOpenChange={onOpenChange}>
         <Form className="w-full" onSubmit={(e) => onSubmit(e, onOpenChange)}>
@@ -67,11 +100,12 @@ export const AssignTaskForm = () => {
             {(onClose) => (
               <>
                 <ModalHeader className="flex flex-col gap-1">
-                  Assign Task
+                  {mode === "edit" ? "Edit Task" : "Assign Task"}
                 </ModalHeader>
                 <ModalBody>
                   <Input
                     isRequired
+                    defaultValue={formData.title}
                     errorMessage="Please enter a valid task title"
                     label="Task Title"
                     name="title"
@@ -81,6 +115,7 @@ export const AssignTaskForm = () => {
                   />
                   <Textarea
                     isRequired
+                    defaultValue={formData.description}
                     errorMessage="Please enter a valid task description"
                     label="Task Description"
                     name="description"
@@ -90,6 +125,7 @@ export const AssignTaskForm = () => {
                   <Select
                     isRequired
                     className="w-full"
+                    defaultSelectedKeys={[formData.priority || "medium"]}
                     items={priorities}
                     label="Priority"
                     name="priority"
@@ -102,6 +138,7 @@ export const AssignTaskForm = () => {
                   </Select>
                   <Input
                     isRequired
+                    defaultValue={formData.dueDate}
                     errorMessage="Please enter a valid due date"
                     label="Due Date"
                     name="dueDate"
@@ -121,7 +158,7 @@ export const AssignTaskForm = () => {
                     Cancel
                   </Button>
                   <Button color="primary" type="submit">
-                    Assign Task
+                    {mode === "edit" ? "Update Task" : "Assign Task"}
                   </Button>
                 </ModalFooter>
               </>

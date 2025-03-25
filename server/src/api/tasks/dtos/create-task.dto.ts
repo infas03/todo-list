@@ -73,6 +73,9 @@ export class CreateTaskDto {
 }
 
 export class UpdateTaskDto {
+  @IsString()
+  id?: string;
+
   @IsOptional()
   @IsString()
   title?: string;

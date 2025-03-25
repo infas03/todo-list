@@ -65,21 +65,15 @@ export class TaskController {
 
   async getTasks(req: Request, res: Response): Promise<void> {
     try {
-      const { mainFilter, sortOrder, search } = req.query;
+      const mainFilter = req.query.mainFilter?.toString() || 'dueDate';
+      const sortOrder = req.query.sortOrder?.toString() || 'asc';
+      const search = req.query.search?.toString();
 
-      const filters: { [key: string]: any } = {};
-
-      if (mainFilter) {
-        filters.mainFilter = mainFilter;
-      }
-
-      if (sortOrder) {
-        filters.sortOrder = sortOrder;
-      }
-
-      if (search) {
-        filters.search = search;
-      }
+      const filters = {
+        mainFilter,
+        sortOrder,
+        ...(search && { search })
+      };
 
       const tasks = await this.taskService.getUserTasks(req.user.id, filters);
 

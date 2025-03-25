@@ -1,6 +1,6 @@
 import ToastBar from "../../components/toastBar";
 import api from "../../services/api";
-import { TaskInput } from "../types";
+import { TaskInput, UpdateTaskInput } from "../types";
 
 interface ApiError {
   response?: {
@@ -20,13 +20,12 @@ export const fetchTasksSuccess = (data: any) => ({
   payload: data,
 });
 
-export const getAllTasks = (queryParams: string) => {
+export const getAllTasks = (queryParams?: string) => {
   return async (dispatch: any): Promise<void> => {
     try {
       const response = await api.get(`/tasks?${queryParams}`);
 
       if (response.data.success) {
-        console.log("response: ", response.data);
         dispatch(fetchTasksSuccess(response.data.data));
       }
     } catch (error) {
@@ -46,14 +45,65 @@ export const getAllTasks = (queryParams: string) => {
 };
 
 export const createTask = (values: TaskInput, onClose: () => void) => {
-  return async (): Promise<void> => {
+  return async (dispatch: any): Promise<void> => {
     try {
       const response = await api.post("/tasks", values);
 
       if (response.data.success) {
-        console.log("response: ", response.data);
+        dispatch(getAllTasks());
         ToastBar.success(response.data.message);
         onClose();
+      }
+    } catch (error) {
+      const apiError = error as ApiError;
+
+      if (apiError.response && apiError.response.status === 500) {
+        const errorMsg = Array.isArray(apiError.response.data.errorMsg)
+          ? apiError.response.data.errorMsg.join(", ")
+          : apiError.response.data.errorMsg;
+
+        ToastBar.error(errorMsg);
+      } else {
+        ToastBar.error(apiError.message);
+      }
+    }
+  };
+};
+
+export const updateTask = (values: UpdateTaskInput, onClose: () => void) => {
+  return async (dispatch: any): Promise<void> => {
+    try {
+      const response = await api.patch(`/tasks/${values.id}`, values);
+
+      if (response.data.success) {
+        dispatch(getAllTasks());
+        ToastBar.success(response.data.message);
+        onClose();
+      }
+    } catch (error) {
+      const apiError = error as ApiError;
+
+      if (apiError.response && apiError.response.status === 500) {
+        const errorMsg = Array.isArray(apiError.response.data.errorMsg)
+          ? apiError.response.data.errorMsg.join(", ")
+          : apiError.response.data.errorMsg;
+
+        ToastBar.error(errorMsg);
+      } else {
+        ToastBar.error(apiError.message);
+      }
+    }
+  };
+};
+
+export const deleteTask = (taskId: string, fetchTask: () => void) => {
+  return async (): Promise<void> => {
+    try {
+      const response = await api.delete(`/tasks/${taskId}`);
+
+      if (response.data.success) {
+        fetchTask();
+        ToastBar.success(response.data.message);
       }
     } catch (error) {
       const apiError = error as ApiError;

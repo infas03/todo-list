@@ -12,7 +12,7 @@ import { Pagination } from "@heroui/react";
 
 import { EmployeesAddForm } from "./employeeAddForm";
 import { EmployerTableSkeleton } from "./skeleton/employerTableSkeleton";
-import { AssignTaskForm } from "./assignTaskForm";
+import { AssignTaskForm } from "./taskForm";
 import { DeleteConfirmationForm } from "./deleteConfirmationModal";
 
 import { Employee } from "@/types";
