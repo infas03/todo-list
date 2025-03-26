@@ -16,8 +16,8 @@ export interface ITask extends Document {
 }
 
 const recurrenceSchema = new Schema<Recurrence>({
-  pattern: { type: String, required: true, enum: ['daily', 'weekly', 'monthly', 'yearly'] },
-  nextOccurrence: { type: Date, required: true }
+  pattern: { type: String, enum: ['daily', 'weekly', 'monthly', 'yearly', 'none'] },
+  nextOccurrence: { type: Date }
 });
 
 const taskSchema = new Schema<ITask>({

@@ -39,7 +39,7 @@ export class TaskService {
       taskData.recurrence = {
         pattern: data.recurrence.pattern,
         nextOccurrence: this.calculateNextOccurrence({
-          pattern: data.recurrence.pattern,
+          pattern: data.recurrence.pattern || 'none',
           startDate: data.dueDate || new Date()
         }),
       };

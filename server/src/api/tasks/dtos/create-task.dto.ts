@@ -10,7 +10,7 @@ export class RecurrenceDto {
   @IsIn(RECURRENCE_PATTERNS, {
     message: `Pattern must be one of: ${RECURRENCE_PATTERNS.join(', ')}`
   })
-  pattern: RecurrencePattern;
+  pattern?: RecurrencePattern;
 
   @IsDateString()
   @IsOptional()
