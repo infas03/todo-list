@@ -25,8 +25,9 @@ export interface TaskInput {
 
 export interface UpdateTaskInput {
   id?: string;
-  title: string;
-  priority: string;
-  description: string;
-  dueDate: string;
+  title?: string;
+  priority?: string;
+  description?: string;
+  dependencies?: string[];
+  dueDate?: string;
 }

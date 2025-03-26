@@ -3,7 +3,6 @@ import { TaskService } from "../services/task.service";
 import { TaskRepository } from "../repositories/task.repository";
 import { CreateTaskDto, UpdateTaskDto } from "../dtos/create-task.dto";
 import { HttpStatus } from "../../../core/constants/httpStatus";
-import { TaskPriority, TaskStatus } from "../interfaces/task.interface";
 
 export class TaskController {
   private taskService: TaskService;
@@ -152,11 +151,12 @@ export class TaskController {
         statusCode: HttpStatus.OK,
         message: "Task deleted successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.log('error delete: ', error.message)
       this.sendResponse(res, {
         success: false,
         statusCode: HttpStatus.BAD_REQUEST,
-        message: (error as Error).message,
+        message: error.message,
       });
     }
   }

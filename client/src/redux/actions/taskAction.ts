@@ -8,6 +8,7 @@ interface ApiError {
     data: {
       errorMsg: string | string[];
       status: number;
+      message: string | string[];
     };
   };
   message: string;
@@ -70,7 +71,7 @@ export const createTask = (values: TaskInput, onClose: () => void) => {
   };
 };
 
-export const updateTask = (values: UpdateTaskInput, onClose: () => void) => {
+export const updateTask = (values: UpdateTaskInput, onClose?: () => void) => {
   return async (dispatch: any): Promise<void> => {
     try {
       const response = await api.patch(`/tasks/${values.id}`, values);
@@ -78,20 +79,10 @@ export const updateTask = (values: UpdateTaskInput, onClose: () => void) => {
       if (response.data.success) {
         dispatch(getAllTasks());
         ToastBar.success(response.data.message);
-        onClose();
+        onClose && onClose();
       }
-    } catch (error) {
-      const apiError = error as ApiError;
-
-      if (apiError.response && apiError.response.status === 500) {
-        const errorMsg = Array.isArray(apiError.response.data.errorMsg)
-          ? apiError.response.data.errorMsg.join(", ")
-          : apiError.response.data.errorMsg;
-
-        ToastBar.error(errorMsg);
-      } else {
-        ToastBar.error(apiError.message);
-      }
+    } catch (error: any) {
+      ToastBar.warning(error.response.data.message);
     }
   };
 };
@@ -105,18 +96,8 @@ export const deleteTask = (taskId: string, fetchTask: () => void) => {
         fetchTask();
         ToastBar.success(response.data.message);
       }
-    } catch (error) {
-      const apiError = error as ApiError;
-
-      if (apiError.response && apiError.response.status === 500) {
-        const errorMsg = Array.isArray(apiError.response.data.errorMsg)
-          ? apiError.response.data.errorMsg.join(", ")
-          : apiError.response.data.errorMsg;
-
-        ToastBar.error(errorMsg);
-      } else {
-        ToastBar.error(apiError.message);
-      }
+    } catch (error: any) {
+      ToastBar.warning(error.response.data.message);
     }
   };
 };

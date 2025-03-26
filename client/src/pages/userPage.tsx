@@ -1,10 +1,11 @@
 import { Alert } from "@heroui/react";
+
 import DefaultLayout from "../layouts/default";
 import { UserTaskTable } from "../components/userTaskTable";
 
 export default function User() {
   const alertDescription =
-    "You can sort your tasks by due date or priority. Mark tasks as completed when you finish them.";
+    "You can sort your tasks by status, due date or priority. Mark tasks as completed when you finish them.";
 
   return (
     <DefaultLayout>

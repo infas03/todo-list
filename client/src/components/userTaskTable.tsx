@@ -10,7 +10,6 @@ import {
 import { useEffect, useState } from "react";
 import {
   Alert,
-  Button,
   Checkbox,
   Chip,
   Input,
@@ -22,24 +21,27 @@ import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 
 import { useAuth } from "../context/AuthProvider";
-import api from "../services/api";
 import { taskFilter, userTaskTableColumns } from "../config/staticValue";
 import { Task } from "../types";
 
 import { EmployerTableSkeleton } from "./skeleton/employerTableSkeleton";
 import { FilterSwitch } from "./filterSwitch";
 import { TaskForm } from "./taskForm";
+import { DeleteConfirmationForm } from "./deleteConfirmationModal";
+import { AddDependenciesButton } from "./addDependenciesButton";
 
 import { RootState } from "@/redux/store";
-import { deleteTask, getAllTasks } from "@/redux/actions/taskAction";
-import { DeleteConfirmationForm } from "./deleteConfirmationModal";
+import {
+  deleteTask,
+  getAllTasks,
+  updateTask,
+} from "@/redux/actions/taskAction";
 
 export const UserTaskTable = () => {
   const dispatch: ThunkDispatch<RootState, unknown, AnyAction> = useDispatch();
 
   const task = useSelector((state: RootState) => state.task);
 
-  console.log("tasks: ", task);
   const [isLoading, setIsLoading] = useState(true);
   const [mainFilter, setMainFilter] = useState<string | undefined>("dueDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -94,24 +96,15 @@ export const UserTaskTable = () => {
     try {
       const updatedStatus = currentStatus === "done" ? "not_done" : "done";
 
-      const response = await api.put(`/tasks/${taskId}`, {
+      const updateData = {
+        id: taskId,
         status: updatedStatus,
-      });
+      };
 
-      if (response.data.success) {
-        fetchTasks();
-      } else {
-        // eslint-disable-next-line no-console
-        console.error("Login failed. Please try again.");
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        // eslint-disable-next-line no-console
-        console.error("Invalid credentials.");
-      } else {
-        // eslint-disable-next-line no-console
-        console.error("An unexpected error occurred. Please try again.");
-      }
+      await dispatch(updateTask(updateData));
+    } catch (error: any) {
+      // eslint-disable-next-line no-console
+      console.error("error" + error);
     }
   };
 
@@ -126,12 +119,18 @@ export const UserTaskTable = () => {
   };
 
   const handleDeleteEmployee = async (taskId: string) => {
-    console.log('delete ID: ', taskId)
     try {
       dispatch(deleteTask(taskId, fetchTasks));
     } catch {
       throw new Error("Failed to delete employee");
     }
+  };
+
+  const handleDependenciesSelected = (
+    taskId: string,
+    selectedIds: string[],
+  ) => {
+    dispatch(updateTask({ id: taskId, dependencies: selectedIds }));
   };
 
   return (
@@ -234,16 +233,16 @@ export const UserTaskTable = () => {
                                 month: "long",
                                 day: "numeric",
                                 year: "numeric",
-                              }
+                              },
                             )}
                             variant="bordered"
                           />
                         )}
                         {columnKey === "status" && (
-                          <div className="">
+                          <div>
                             <Checkbox
                               color="success"
-                              defaultSelected={item?.status === "done"}
+                              isSelected={item?.status === "done"}
                               onChange={() => {
                                 if (item.id !== undefined) {
                                   handleCheckboxChange(item.id, item?.status);
@@ -258,6 +257,14 @@ export const UserTaskTable = () => {
                         )}
                         {columnKey === "action" && (
                           <div className="flex items-center gap-x-2">
+                            <AddDependenciesButton
+                              allTasks={task.tasks}
+                              currentDependencies={item.dependencies}
+                              currentTaskId={item.id}
+                              onDependenciesSelected={(selectedIds) =>
+                                handleDependenciesSelected(item.id, selectedIds)
+                              }
+                            />
                             <TaskForm mode="edit" task={item} />
                             <DeleteConfirmationForm
                               entityName="task"

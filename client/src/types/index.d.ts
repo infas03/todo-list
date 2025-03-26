@@ -26,10 +26,11 @@ export interface LoginFormData {
 }
 
 export interface Task {
-  id?: string;
+  id: string;
   title: string;
   status: string;
   description: string;
   priority: string;
   dueDate: string;
+  dependencies: string[];
 }

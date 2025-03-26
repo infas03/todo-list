@@ -73,7 +73,7 @@ export class TaskService {
       throw new Error('Task not found or unauthorized');
     }
 
-    if (updates.status === TaskStatus.NOT_DONE) {
+    if (updates.status === TaskStatus.DONE) {
       await this.validateTaskCompletion(id, userId);
     }
 
