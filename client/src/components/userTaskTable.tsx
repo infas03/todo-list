@@ -58,6 +58,8 @@ export const UserTaskTable = () => {
 
   const { userDetails } = useAuth();
 
+  console.log("check: ", isLoadingDepend);
+
   const fetchTasks = async () => {
     setIsLoading(true);
 
@@ -146,8 +148,6 @@ export const UserTaskTable = () => {
       fetchTasks();
     }
   };
-
-  console.log("isLoadingDelete: ", isLoadingDelete);
 
   const handleDeleteTask = async (taskId: string) => {
     setIsLoadingDelete((prevState) => ({

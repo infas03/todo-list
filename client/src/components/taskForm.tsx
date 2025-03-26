@@ -50,6 +50,8 @@ export const TaskForm = ({ mode = "create", task }: TaskFormProps) => {
     Record<string, boolean>
   >({});
 
+  console.log("check: ", isLoadingDepend, isLoadingStatus);
+
   useEffect(() => {
     if (mode === "edit" && task) {
       setFormData({

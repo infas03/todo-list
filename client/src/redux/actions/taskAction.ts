@@ -116,7 +116,7 @@ export const deleteTask = (
   fetchTask: () => void,
   setIsLoadingDelete: (taskId: string, loading: boolean) => void
 ) => {
-  return async (dispatch: any): Promise<void> => {
+  return async (): Promise<void> => {
     try {
       const response = await api.delete(`/tasks/${taskId}`);
 
