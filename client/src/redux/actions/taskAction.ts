@@ -65,18 +65,10 @@ export const createTask = (
         onClose();
         setIsLoading(false);
       }
-    } catch (error) {
-      const apiError = error as ApiError;
-
-      if (apiError.response && apiError.response.status === 500) {
-        const errorMsg = Array.isArray(apiError.response.data.errorMsg)
-          ? apiError.response.data.errorMsg.join(", ")
-          : apiError.response.data.errorMsg;
-
-        ToastBar.error(errorMsg);
-      } else {
-        ToastBar.error(apiError.message);
-      }
+    } catch (error: any) {
+      // eslint-disable-next-line no-console
+      console.error("error: ", error);
+      ToastBar.warning(error.response.data.message);
       setIsLoading(false);
     }
   };
@@ -106,6 +98,7 @@ export const updateTask = (
       setIsLoading && setIsLoading(false);
       setIsLoadingStatus && taskId && setIsLoadingStatus(taskId, false);
       setIsLoadingDepend && taskId && setIsLoadingDepend(taskId, false);
+      console.log(error);
       ToastBar.warning(error.response.data.message);
     }
   };
