@@ -12,14 +12,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 
-import { EmployerTableSkeleton } from "./skeleton/employerTableSkeleton";
-import { UserAddForm } from "./userAddForm";
-import { DeleteConfirmationForm } from "./deleteConfirmationModal";
+import { employeesTableColumns } from "../config/staticValue";
+import { RootState } from "../redux/store";
+import { getAllUsers, userDelete } from "../redux/actions/userAction";
+import { User } from "../types";
 
-import { employeesTableColumns } from "@/config/staticValue";
-import { RootState } from "@/redux/store";
-import { getAllUsers, userDelete } from "@/redux/actions/userAction";
-import { User } from "@/types";
+import { UserAddForm } from "./userAddForm";
+import { EmployerTableSkeleton } from "./skeleton/employerTableSkeleton";
+import { DeleteConfirmationForm } from "./deleteConfirmationModal";
 
 export const UsersTable = () => {
   const dispatch: ThunkDispatch<RootState, unknown, AnyAction> = useDispatch();

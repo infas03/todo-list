@@ -8,10 +8,6 @@ export const siteConfig = {
       label: "Home",
       href: "/",
     },
-    {
-      label: "Users",
-      href: "/users",
-    },
   ],
   links: {
     github: "https://github.com/infas03/to-do-infas",

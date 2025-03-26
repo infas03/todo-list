@@ -2,12 +2,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import { ROLES } from "../constants/role";
 import { useAuth } from "../context/AuthProvider";
-import Admin from "../pages/adminPage";
 import User from "../pages/userPage";
 import Login from "../pages/loginPage";
 import AdminUsersPage from "../pages/adminUsersPage";
-
-import { ProtectedRoute } from "./protectedRoute";
 
 const AppRoutes = () => {
   const { isLoggedIn, role, resolved } = useAuth();
@@ -20,21 +17,17 @@ const AppRoutes = () => {
     <Routes>
       <Route
         element={
-          isLoggedIn ? role === ROLES.ADMIN ? <Admin /> : <User /> : <Login />
+          isLoggedIn ? (
+            role === ROLES.ADMIN ? (
+              <AdminUsersPage />
+            ) : (
+              <User />
+            )
+          ) : (
+            <Login />
+          )
         }
         path="/"
-      />
-
-      <Route
-        element={
-          <ProtectedRoute
-            isAllowed={isLoggedIn && role === ROLES.ADMIN}
-            redirectPath="/"
-          >
-            <AdminUsersPage />
-          </ProtectedRoute>
-        }
-        path="/users"
       />
 
       <Route element={<Navigate to="/" />} path="*" />
