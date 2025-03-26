@@ -116,21 +116,17 @@ export const UserTaskTable = () => {
           updateData,
           setIsLoading,
           taskId,
-          (taskId: string, loading: boolean) =>
-            setIsLoadingStatus((prevState) => ({
-              ...prevState,
-              [taskId]: loading,
-            })),
-          (taskId: string, loading: boolean) =>
-            setIsLoadingDepend((prevState) => ({
-              ...prevState,
-              [taskId]: loading,
-            }))
-        )
+          (id, loading) =>
+            setIsLoadingStatus((prev) => ({ ...prev, [id]: loading })),
+          (id, loading) =>
+            setIsLoadingDepend((prev) => ({ ...prev, [id]: loading })),
+        ),
       );
     } catch (error: any) {
       // eslint-disable-next-line no-console
       console.error("error" + error);
+
+      setIsLoadingStatus((prev) => ({ ...prev, [taskId]: false }));
     }
   };
 
@@ -186,9 +182,12 @@ export const UserTaskTable = () => {
   };
 
   useEffect(() => {
-    console.log("isLoadingDepend: ", isLoadingDepend);
+    // console.log("isLoadingDepend: ", isLoadingDepend);
   }, []);
-
+  useEffect(() => {
+    console.log('isLoadingStatus changed:', isLoadingStatus);
+  }, [isLoadingStatus]);
+  
   return (
     <div className="p-4 w-full">
       <div className="flex justify-end items-center mb-4 text-sm">
@@ -293,7 +292,7 @@ export const UserTaskTable = () => {
                         )}
                         {columnKey === "status" && (
                           <div className="w-44">
-                            {isLoadingStatus[item.id] ? (
+                            {Boolean(isLoadingStatus[item.id]) ? (
                               <Spinner color="primary" />
                             ) : (
                               <Checkbox

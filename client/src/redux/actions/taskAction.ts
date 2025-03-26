@@ -82,32 +82,35 @@ export const updateTask = (
   setIsLoadingDepend: (taskId: string, loading: boolean) => void,
   onClose?: () => void
 ) => {
-  return async (dispatch: any): Promise<void> => {
-    console.log('taskId: ', taskId)
+  return async (dispatch: any): Promise<boolean> => {
+    console.log("taskId: ", taskId);
     try {
       const response = await api.patch(`/tasks/${values.id}`, values);
 
       if (response.data.success) {
-        await dispatch(getAllTasks());
         ToastBar.success(response.data.message);
         onClose && onClose();
-        setIsLoading && setIsLoading(false);
-        setIsLoadingStatus && taskId && setIsLoadingStatus(taskId, false);
-        setIsLoadingDepend && taskId && setIsLoadingDepend(taskId, false);
+
+        return true;
       }
+
+      return false;
     } catch (error: any) {
+      console.log(error);
+      ToastBar.warning(error.response.data.message);
+
+      return false;
+    } finally {
       setIsLoading && setIsLoading(false);
       setIsLoadingStatus && taskId && setIsLoadingStatus(taskId, false);
       setIsLoadingDepend && taskId && setIsLoadingDepend(taskId, false);
-      console.log(error);
-      ToastBar.warning(error.response.data.message);
+      await dispatch(getAllTasks());
     }
   };
 };
 
 export const deleteTask = (taskId: string) => {
   return async (dispatch: any): Promise<void> => {
-
     try {
       const response = await api.delete(`/tasks/${taskId}`);
 
