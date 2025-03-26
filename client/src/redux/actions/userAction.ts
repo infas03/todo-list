@@ -38,6 +38,7 @@ export const userLogin = (
   navigate: (path: string) => void,
   login: (token: string, role: Role, userDetails: User) => void,
   setError: (error: string) => void,
+  setIsLoading: (loading: boolean) => void,
 ) => {
   return async (): Promise<void> => {
     try {
@@ -49,11 +50,13 @@ export const userLogin = (
         login(
           response.data.data.token,
           response.data.data.user.role,
-          response.data.data.user
+          response.data.data.user,
         );
         navigate("/");
+        setIsLoading(false);
       }
     } catch (error: any) {
+      setIsLoading(false);
       setError(error.response.data.message);
       ToastBar.error(error.response.data.message);
     }

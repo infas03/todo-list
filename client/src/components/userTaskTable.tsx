@@ -15,6 +15,7 @@ import {
   Input,
   Select,
   SelectItem,
+  Spinner,
 } from "@heroui/react";
 import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
@@ -41,7 +42,16 @@ export const UserTaskTable = () => {
 
   const task = useSelector((state: RootState) => state.task);
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingStatus, setIsLoadingStatus] = useState<
+    Record<string, boolean>
+  >({});
+  const [isLoadingDepend, setIsLoadingDepend] = useState<
+    Record<string, boolean>
+  >({});
+  const [isLoadingDelete, setIsLoadingDelete] = useState<
+    Record<string, boolean>
+  >({});
   const [mainFilter, setMainFilter] = useState<string | undefined>("dueDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [searchTerm, setSearchTerm] = useState("");
@@ -62,11 +72,10 @@ export const UserTaskTable = () => {
         throw new Error("User details are not available");
       }
 
-      dispatch(getAllTasks(queryParams.toString()));
+      dispatch(getAllTasks(queryParams.toString(), setIsLoading));
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error fetching tasks:", error);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -90,9 +99,14 @@ export const UserTaskTable = () => {
 
   const handleCheckboxChange = async (
     taskId: string,
-    currentStatus: string,
+    currentStatus: string
   ) => {
     try {
+      setIsLoadingStatus((prevState) => ({
+        ...prevState,
+        [taskId]: true,
+      }));
+
       const updatedStatus = currentStatus === "done" ? "not_done" : "done";
 
       const updateData = {
@@ -100,7 +114,23 @@ export const UserTaskTable = () => {
         status: updatedStatus,
       };
 
-      await dispatch(updateTask(updateData));
+      await dispatch(
+        updateTask(
+          updateData,
+          setIsLoading,
+          taskId,
+          (taskId: string, loading: boolean) =>
+            setIsLoadingStatus((prevState) => ({
+              ...prevState,
+              [taskId]: loading,
+            })),
+          (taskId: string, loading: boolean) =>
+            setIsLoadingDepend((prevState) => ({
+              ...prevState,
+              [taskId]: loading,
+            }))
+        )
+      );
     } catch (error: any) {
       // eslint-disable-next-line no-console
       console.error("error" + error);
@@ -118,8 +148,20 @@ export const UserTaskTable = () => {
   };
 
   const handleDeleteTask = async (taskId: string) => {
+    setIsLoadingDelete((prevState) => ({
+      ...prevState,
+      [taskId]: true,
+    }));
+
     try {
-      dispatch(deleteTask(taskId, fetchTasks));
+      dispatch(
+        deleteTask(taskId, fetchTasks, (taskId: string, loading: boolean) =>
+          setIsLoadingDelete((prevState) => ({
+            ...prevState,
+            [taskId]: loading,
+          }))
+        )
+      );
     } catch {
       throw new Error("Failed to delete employee");
     }
@@ -127,9 +169,30 @@ export const UserTaskTable = () => {
 
   const handleDependenciesSelected = (
     taskId: string,
-    selectedIds: string[],
+    selectedIds: string[]
   ) => {
-    dispatch(updateTask({ id: taskId, dependencies: selectedIds }));
+    setIsLoadingDepend((prevState) => ({
+      ...prevState,
+      [taskId]: true,
+    }));
+
+    dispatch(
+      updateTask(
+        { id: taskId, dependencies: selectedIds },
+        setIsLoading,
+        taskId,
+        (taskId: string, loading: boolean) =>
+          setIsLoadingStatus((prevState) => ({
+            ...prevState,
+            [taskId]: loading,
+          })),
+        (taskId: string, loading: boolean) =>
+          setIsLoadingDepend((prevState) => ({
+            ...prevState,
+            [taskId]: loading,
+          }))
+      )
+    );
   };
 
   return (
@@ -213,7 +276,7 @@ export const UserTaskTable = () => {
                         )}
                         {columnKey === "dueDate" && (
                           <Alert
-                            className={`border-transparent text-xs ${
+                            className={`border-transparent text-xs w-48 ${
                               new Date(item?.dueDate) < new Date()
                                 ? "text-red-500"
                                 : new Date(item?.dueDate).toDateString() ===
@@ -229,26 +292,31 @@ export const UserTaskTable = () => {
                                 month: "long",
                                 day: "numeric",
                                 year: "numeric",
-                              },
+                              }
                             )}
                             variant="bordered"
                           />
                         )}
                         {columnKey === "status" && (
                           <div>
-                            <Checkbox
-                              color="success"
-                              isSelected={item?.status === "done"}
-                              onChange={() => {
-                                if (item.id !== undefined) {
-                                  handleCheckboxChange(item.id, item?.status);
-                                }
-                              }}
-                            >
-                              {item?.status === "done"
-                                ? "Completed"
-                                : "Mark as completed"}
-                            </Checkbox>
+                            {isLoadingStatus[item.id] ? (
+                              <Spinner color="primary" />
+                            ) : (
+                              <Checkbox
+                                color="success"
+                                disabled={isLoadingStatus[item.id]}
+                                isSelected={item?.status === "done"}
+                                onChange={() => {
+                                  if (item.id !== undefined) {
+                                    handleCheckboxChange(item.id, item?.status);
+                                  }
+                                }}
+                              >
+                                {item?.status === "done"
+                                  ? "Completed"
+                                  : "Mark as completed"}
+                              </Checkbox>
+                            )}
                           </div>
                         )}
                         {columnKey === "action" && (
@@ -262,11 +330,15 @@ export const UserTaskTable = () => {
                               }
                             />
                             <TaskForm mode="edit" task={item} />
-                            <DeleteConfirmationForm
-                              entityName="task"
-                              id={item.id!}
-                              onConfirm={handleDeleteTask}
-                            />
+                            {isLoadingDelete[item.id] ? (
+                              <Spinner color="primary" />
+                            ) : (
+                              <DeleteConfirmationForm
+                                entityName="task"
+                                id={item.id!}
+                                onConfirm={handleDeleteTask}
+                              />
+                            )}
                           </div>
                         )}
                         {columnKey !== "name" &&

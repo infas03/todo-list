@@ -2,7 +2,7 @@ import { IsEnum, IsOptional, IsString, IsDateString, IsArray, ValidateNested, Is
 import { TaskPriority, TaskStatus } from '../interfaces/task.interface';
 import { Type } from 'class-transformer';
 
-const RECURRENCE_PATTERNS = ['daily', 'weekly', 'monthly', 'yearly'] as const;
+const RECURRENCE_PATTERNS = ['daily', 'weekly', 'monthly', 'yearly', 'none'] as const;
 export type RecurrencePattern = typeof RECURRENCE_PATTERNS[number];
 
 export class RecurrenceDto {

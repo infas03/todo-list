@@ -39,11 +39,11 @@ export default function Login() {
     ) as unknown as LoginFormData;
 
     try {
-      dispatch(userLogin(data, navigate, login, setError));
+      dispatch(userLogin(data, navigate, login, setError, setIsLoading));
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error logging in:", error);
-    } finally {
+
       setIsLoading(false);
     }
   };

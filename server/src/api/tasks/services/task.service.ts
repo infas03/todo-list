@@ -34,7 +34,7 @@ export class TaskService {
       dependencies: data.dependencies || [],
     };
 
-    if (data.recurrence) {
+    if (data.recurrence && data.recurrence.pattern !== 'none') {
       taskData.recurrence = {
         pattern: data.recurrence.pattern,
         nextOccurrence: this.calculateNextOccurrence({
@@ -42,6 +42,8 @@ export class TaskService {
           startDate: data.dueDate || new Date()
         }),
       };
+    } else {
+      delete taskData.recurrence;
     }
 
     const task = await this.taskRepo.create(taskData);
@@ -200,7 +202,7 @@ export class TaskService {
   // }
   
   private calculateNextOccurrence(recurrence: {
-    pattern: 'daily' | 'weekly' | 'monthly' | 'yearly';
+    pattern: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'none';
     startDate: Date;
   }): Date {
     const nextDate = new Date(recurrence.startDate);

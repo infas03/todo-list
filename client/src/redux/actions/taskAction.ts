@@ -21,13 +21,17 @@ export const fetchTasksSuccess = (data: any) => ({
   payload: data,
 });
 
-export const getAllTasks = (queryParams?: string) => {
+export const getAllTasks = (
+  queryParams?: string,
+  setIsLoading?: (loading: boolean) => void
+) => {
   return async (dispatch: any): Promise<void> => {
     try {
       const response = await api.get(`/tasks?${queryParams}`);
 
       if (response.data.success) {
         dispatch(fetchTasksSuccess(response.data.data));
+        setIsLoading && setIsLoading(false);
       }
     } catch (error) {
       const apiError = error as ApiError;
@@ -41,11 +45,16 @@ export const getAllTasks = (queryParams?: string) => {
       } else {
         ToastBar.error(apiError.message);
       }
+      setIsLoading && setIsLoading(false);
     }
   };
 };
 
-export const createTask = (values: TaskInput, onClose: () => void) => {
+export const createTask = (
+  values: TaskInput,
+  onClose: () => void,
+  setIsLoading: (loading: boolean) => void
+) => {
   return async (dispatch: any): Promise<void> => {
     try {
       const response = await api.post("/tasks", values);
@@ -54,6 +63,7 @@ export const createTask = (values: TaskInput, onClose: () => void) => {
         dispatch(getAllTasks());
         ToastBar.success(response.data.message);
         onClose();
+        setIsLoading(false);
       }
     } catch (error) {
       const apiError = error as ApiError;
@@ -67,11 +77,20 @@ export const createTask = (values: TaskInput, onClose: () => void) => {
       } else {
         ToastBar.error(apiError.message);
       }
+      setIsLoading(false);
     }
   };
 };
 
-export const updateTask = (values: UpdateTaskInput, onClose?: () => void) => {
+export const updateTask = (
+  values: UpdateTaskInput,
+  setIsLoading: (loading: boolean) => void,
+  taskId: string,
+  setIsLoadingStatus: (taskId: string, loading: boolean) => void,
+  setIsLoadingDepend: (taskId: string, loading: boolean) => void,
+
+  onClose?: () => void
+) => {
   return async (dispatch: any): Promise<void> => {
     try {
       const response = await api.patch(`/tasks/${values.id}`, values);
@@ -80,14 +99,24 @@ export const updateTask = (values: UpdateTaskInput, onClose?: () => void) => {
         dispatch(getAllTasks());
         ToastBar.success(response.data.message);
         onClose && onClose();
+        setIsLoading && setIsLoading(false);
+        setIsLoadingStatus && taskId && setIsLoadingStatus(taskId, false);
+        setIsLoadingDepend && taskId && setIsLoadingDepend(taskId, false);
       }
     } catch (error: any) {
+      setIsLoading && setIsLoading(false);
+      setIsLoadingStatus && taskId && setIsLoadingStatus(taskId, false);
+      setIsLoadingDepend && taskId && setIsLoadingDepend(taskId, false);
       ToastBar.warning(error.response.data.message);
     }
   };
 };
 
-export const deleteTask = (taskId: string, fetchTask: () => void) => {
+export const deleteTask = (
+  taskId: string,
+  fetchTask: () => void,
+  setIsLoadingDelete: (taskId: string, loading: boolean) => void
+) => {
   return async (): Promise<void> => {
     try {
       const response = await api.delete(`/tasks/${taskId}`);
@@ -95,6 +124,7 @@ export const deleteTask = (taskId: string, fetchTask: () => void) => {
       if (response.data.success) {
         fetchTask();
         ToastBar.success(response.data.message);
+        setIsLoadingDelete && taskId && setIsLoadingDelete(taskId, false);
       }
     } catch (error: any) {
       ToastBar.warning(error.response.data.message);

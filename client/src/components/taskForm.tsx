@@ -42,6 +42,7 @@ export const TaskForm = ({ mode = "create", task }: TaskFormProps) => {
       pattern: "",
     },
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (mode === "edit" && task) {
@@ -61,13 +62,15 @@ export const TaskForm = ({ mode = "create", task }: TaskFormProps) => {
 
   const onSubmit = async (
     e: React.FormEvent<HTMLFormElement>,
-    onClose: () => void,
+    onClose: () => void
   ) => {
-    setError(null);
     e.preventDefault();
 
+    setError(null);
+    setIsLoading(true);
+
     const data = Object.fromEntries(
-      new FormData(e.currentTarget),
+      new FormData(e.currentTarget)
     ) as unknown as AssignFormData;
 
     const addData = {
@@ -89,19 +92,20 @@ export const TaskForm = ({ mode = "create", task }: TaskFormProps) => {
 
     try {
       if (mode === "edit" && task) {
-        await dispatch(updateTask(updateData, onClose));
+        await dispatch(updateTask(updateData, setIsLoading, onClose));
       } else {
-        await dispatch(createTask(addData, onClose));
+        await dispatch(createTask(addData, onClose, setIsLoading));
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "An error occurred";
 
       setError(errorMessage);
+      setIsLoading(false);
       // eslint-disable-next-line no-console
       console.error(
         `${mode === "edit" ? "Updating" : "Creating"} task failed:`,
-        errorMessage,
+        errorMessage
       );
     }
   };
@@ -193,8 +197,17 @@ export const TaskForm = ({ mode = "create", task }: TaskFormProps) => {
                   >
                     Cancel
                   </Button>
-                  <Button color="primary" type="submit">
-                    {mode === "edit" ? "Update Task" : "Assign Task"}
+                  <Button
+                    color="primary"
+                    disabled={isLoading}
+                    isLoading={isLoading}
+                    type="submit"
+                  >
+                    {isLoading
+                      ? ""
+                      : mode === "edit"
+                        ? "Update Task"
+                        : "Assign Task"}
                   </Button>
                 </ModalFooter>
               </>
