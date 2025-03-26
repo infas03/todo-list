@@ -33,7 +33,7 @@ export function AddDependenciesButton({
   return (
     <Popover isOpen={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button>Add Dependent Task</Button>
+        <Button>Add Depend Task</Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 flex items-start p-4">
         <div className="space-y-4 w-full">

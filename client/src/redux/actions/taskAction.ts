@@ -88,7 +88,6 @@ export const updateTask = (
   taskId: string,
   setIsLoadingStatus: (taskId: string, loading: boolean) => void,
   setIsLoadingDepend: (taskId: string, loading: boolean) => void,
-
   onClose?: () => void
 ) => {
   return async (dispatch: any): Promise<void> => {
@@ -117,7 +116,7 @@ export const deleteTask = (
   fetchTask: () => void,
   setIsLoadingDelete: (taskId: string, loading: boolean) => void
 ) => {
-  return async (): Promise<void> => {
+  return async (dispatch: any): Promise<void> => {
     try {
       const response = await api.delete(`/tasks/${taskId}`);
 
@@ -128,6 +127,7 @@ export const deleteTask = (
       }
     } catch (error: any) {
       ToastBar.warning(error.response.data.message);
+      setIsLoadingDelete && taskId && setIsLoadingDelete(taskId, false);
     }
   };
 };

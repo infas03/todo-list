@@ -43,6 +43,12 @@ export const TaskForm = ({ mode = "create", task }: TaskFormProps) => {
     },
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingStatus, setIsLoadingStatus] = useState<
+    Record<string, boolean>
+  >({});
+  const [isLoadingDepend, setIsLoadingDepend] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => {
     if (mode === "edit" && task) {
@@ -92,7 +98,24 @@ export const TaskForm = ({ mode = "create", task }: TaskFormProps) => {
 
     try {
       if (mode === "edit" && task) {
-        await dispatch(updateTask(updateData, setIsLoading, onClose));
+        await dispatch(
+          updateTask(
+            updateData,
+            setIsLoading,
+            formData.id || "",
+            (taskId: string, loading: boolean) =>
+              setIsLoadingStatus((prevState) => ({
+                ...prevState,
+                [taskId]: loading,
+              })),
+            (taskId: string, loading: boolean) =>
+              setIsLoadingDepend((prevState) => ({
+                ...prevState,
+                [taskId]: loading,
+              })),
+            onClose
+          )
+        );
       } else {
         await dispatch(createTask(addData, onClose, setIsLoading));
       }

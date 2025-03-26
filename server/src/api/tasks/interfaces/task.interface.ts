@@ -12,7 +12,7 @@ export enum TaskStatus {
 }
 
 export interface Recurrence {
-  pattern: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  pattern: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'none';
   nextOccurrence: Date;
   isGeneratedInstance?: boolean;
 }

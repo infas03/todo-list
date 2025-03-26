@@ -147,6 +147,8 @@ export const UserTaskTable = () => {
     }
   };
 
+  console.log("isLoadingDelete: ", isLoadingDelete);
+
   const handleDeleteTask = async (taskId: string) => {
     setIsLoadingDelete((prevState) => ({
       ...prevState,
@@ -154,7 +156,7 @@ export const UserTaskTable = () => {
     }));
 
     try {
-      dispatch(
+      await dispatch(
         deleteTask(taskId, fetchTasks, (taskId: string, loading: boolean) =>
           setIsLoadingDelete((prevState) => ({
             ...prevState,
@@ -240,7 +242,7 @@ export const UserTaskTable = () => {
           <>
             <Table
               aria-label="Example table with dynamic content"
-              className="max-w-5xl"
+              className="max-w-6xl"
             >
               <TableHeader columns={userTaskTableColumns}>
                 {(column) => (
@@ -276,7 +278,7 @@ export const UserTaskTable = () => {
                         )}
                         {columnKey === "dueDate" && (
                           <Alert
-                            className={`border-transparent text-xs w-48 ${
+                            className={`border-transparent text-xs w-52 ${
                               new Date(item?.dueDate) < new Date()
                                 ? "text-red-500"
                                 : new Date(item?.dueDate).toDateString() ===
@@ -298,7 +300,7 @@ export const UserTaskTable = () => {
                           />
                         )}
                         {columnKey === "status" && (
-                          <div>
+                          <div className="w-44">
                             {isLoadingStatus[item.id] ? (
                               <Spinner color="primary" />
                             ) : (
@@ -330,15 +332,17 @@ export const UserTaskTable = () => {
                               }
                             />
                             <TaskForm mode="edit" task={item} />
-                            {isLoadingDelete[item.id] ? (
-                              <Spinner color="primary" />
-                            ) : (
-                              <DeleteConfirmationForm
-                                entityName="task"
-                                id={item.id!}
-                                onConfirm={handleDeleteTask}
-                              />
-                            )}
+                            <div>
+                              {isLoadingDelete[item.id] ? (
+                                <Spinner color="primary" />
+                              ) : (
+                                <DeleteConfirmationForm
+                                  entityName="task"
+                                  id={item.id!}
+                                  onConfirm={handleDeleteTask}
+                                />
+                              )}
+                            </div>
                           </div>
                         )}
                         {columnKey !== "name" &&

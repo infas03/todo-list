@@ -114,6 +114,10 @@ export class TaskService {
       throw new Error("Task not found or unauthorized");
     }
 
+    if (task.recurrence && task.recurrence.pattern === "none") {
+      delete task.recurrence
+    }
+
     const allUserTasks = await this.taskRepo.findByUser(userId);
     const dependentTasks = allUserTasks.filter((t) =>
       (t as any).dependencies?.includes(id)
