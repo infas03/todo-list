@@ -182,7 +182,7 @@ export const UserTaskTable = () => {
   };
 
   useEffect(() => {
-    // console.log("isLoadingDepend: ", isLoadingDepend);
+    console.log("isLoadingDepend: ", isLoadingDepend);
   }, []);
   useEffect(() => {
     console.log('isLoadingStatus changed:', isLoadingStatus);
