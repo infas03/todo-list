@@ -7,7 +7,7 @@ import {
   TableCell,
   getKeyValue,
 } from "@heroui/table";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Checkbox,
