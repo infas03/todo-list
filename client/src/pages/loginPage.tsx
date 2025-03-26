@@ -25,6 +25,7 @@ export default function Login() {
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const { login } = useAuth();
 
   const toggleVisibility = () => setIsPasswordVisible(!isPasswordVisible);
@@ -38,7 +39,7 @@ export default function Login() {
     ) as unknown as LoginFormData;
 
     try {
-      dispatch(userLogin(data, navigate, login));
+      dispatch(userLogin(data, navigate, login, setError));
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error logging in:", error);
@@ -101,6 +102,7 @@ export default function Login() {
             type={isPasswordVisible ? "text" : "password"}
             variant="bordered"
           />
+          {error && <div className="text-red-500 font-medium">{error}</div>}
           <div className="flex gap-2 w-full">
             <Button
               className="w-full h-12 font-medium text-base"

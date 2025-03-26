@@ -1,9 +1,14 @@
-import { FETCH_USER_SUCCESS, LOGOUT_SUCCESS } from "../actions/userAction";
+import {
+  FETCH_ALL_USER_SUCCESS,
+  FETCH_USER_SUCCESS,
+  LOGOUT_SUCCESS,
+} from "../actions/userAction";
 import { UserState } from "../types";
 
 const initialState: UserState = {
   userDetails: null,
   isLoggedIn: false,
+  allUsers: [],
 };
 
 const userReducer = (state = initialState, action: any) => {
@@ -13,6 +18,11 @@ const userReducer = (state = initialState, action: any) => {
         ...state,
         userDetails: action.payload,
         isLoggedIn: true,
+      };
+    case FETCH_ALL_USER_SUCCESS:
+      return {
+        ...state,
+        allUsers: action.payload,
       };
     case LOGOUT_SUCCESS:
       return initialState;

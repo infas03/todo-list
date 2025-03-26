@@ -18,24 +18,20 @@ export const departments = [
 
 export const employeesTableColumns = [
   {
-    key: "id",
-    label: "Employee ID",
+    key: "name",
+    label: "Name",
   },
   {
-    key: "firstName",
-    label: "First Name",
+    key: "email",
+    label: "Email",
   },
   {
-    key: "lastName",
-    label: "Last Name",
+    key: "role",
+    label: "Role",
   },
   {
-    key: "department",
-    label: "Department",
-  },
-  {
-    key: "actions",
-    label: "Actions",
+    key: "action",
+    label: "Action",
   },
 ];
 

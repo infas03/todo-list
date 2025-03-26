@@ -87,9 +87,6 @@ export const TaskForm = ({ mode = "create", task }: TaskFormProps) => {
       },
     };
 
-    console.log('addData: ', addData)
-    console.log('updateData: ', updateData)
-
     try {
       if (mode === "edit" && task) {
         await dispatch(updateTask(updateData, onClose));

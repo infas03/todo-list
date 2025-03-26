@@ -118,7 +118,7 @@ export const UserTaskTable = () => {
     }
   };
 
-  const handleDeleteEmployee = async (taskId: string) => {
+  const handleDeleteTask = async (taskId: string) => {
     try {
       dispatch(deleteTask(taskId, fetchTasks));
     } catch {
@@ -266,7 +266,7 @@ export const UserTaskTable = () => {
                             <DeleteConfirmationForm
                               entityName="task"
                               id={item.id!}
-                              onConfirm={handleDeleteEmployee}
+                              onConfirm={handleDeleteTask}
                             />
                           </div>
                         )}

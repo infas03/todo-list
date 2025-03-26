@@ -3,6 +3,7 @@ import { Task, User } from "@/types";
 export interface UserState {
   userDetails: User | null;
   isLoggedIn: boolean;
+  allUsers: any[];
 }
 
 export interface TaskState {
@@ -13,6 +14,12 @@ export interface TaskState {
 
 export interface LoginInput {
   email: string;
+  password: string;
+}
+
+export interface UserInput {
+  email: string;
+  name: string;
   password: string;
 }
 
@@ -30,4 +37,11 @@ export interface UpdateTaskInput {
   description?: string;
   dependencies?: string[];
   dueDate?: string;
+}
+
+export interface UserTaskInput {
+  _id: string;
+  name?: string;
+  email?: string;
+  password?: string;
 }

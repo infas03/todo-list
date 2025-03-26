@@ -5,7 +5,7 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
 };
 
 export interface User {
-  _id?: number;
+  _id?: string;
   name: string;
   email: string;
   role: string;
@@ -24,6 +24,12 @@ export interface AssignFormData {
   description: string;
   dueDate: string;
   recurrence: Recurrence;
+}
+
+export interface AddUserFormData {
+  name: string;
+  email: string;
+  password: string;
 }
 
 export interface LoginFormData {

@@ -8,30 +8,31 @@ import {
   useDisclosure,
   Input,
   Form,
-  Select,
-  SelectItem,
 } from "@heroui/react";
 import { useState } from "react";
+import { ThunkDispatch } from "redux-thunk";
+import { AnyAction } from "redux";
+import { useDispatch } from "react-redux";
 
-import { EditIcon, EyeFilledIcon, EyeSlashFilledIcon } from "./icons";
+import { EditIcon, EyeFilledIcon, EyeSlashFilledIcon, UserIcon } from "./icons";
 
-import { departments } from "@/config/staticValue";
-import { EmployeeFormData } from "@/types";
-import api from "@/services/api";
+import { AddUserFormData } from "@/types";
+import { RootState } from "@/redux/store";
+import { userRegister, userUpdate } from "@/redux/actions/userAction";
 
-interface EmployeesAddFormProps {
-  onEmployeeCreated: () => void;
+interface UserAddFormProps {
   mode?: "add" | "update";
-  employeeId?: number;
-  initialData?: EmployeeFormData;
+  userId?: string;
+  initialData?: AddUserFormData;
 }
 
-export const EmployeesAddForm = ({
-  onEmployeeCreated,
+export const UserAddForm = ({
   mode = "add",
-  employeeId,
+  userId,
   initialData,
-}: EmployeesAddFormProps) => {
+}: UserAddFormProps) => {
+  const dispatch: ThunkDispatch<RootState, unknown, AnyAction> = useDispatch();
+
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [error, setError] = useState<string | null>(null);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -46,38 +47,34 @@ export const EmployeesAddForm = ({
     e.preventDefault();
 
     const data = Object.fromEntries(
-      new FormData(e.currentTarget),
-    ) as unknown as EmployeeFormData;
+      new FormData(e.currentTarget)
+    ) as unknown as AddUserFormData;
 
-    console.log("Form Data:", data);
+    if (!userId && mode === "update") {
+      setError("User ID is required for updating.");
+
+      return;
+    }
+
+    const updateData = {
+      ...data,
+      _id: userId as string,
+    };
+
+    console.log('updateDate: ', updateData);
 
     try {
-      let response;
-
       if (mode === "add") {
-        response = await api.post("/v1/employees", data);
-      } else if (mode === "update" && employeeId) {
-        response = await api.put(`/v1/employees/${employeeId}`, data);
-      }
-
-      if (response?.data.success) {
-        onClose();
-        onEmployeeCreated();
+        dispatch(userRegister(data, onClose));
+      } else if (mode === "update") {
+        dispatch(userUpdate(updateData, onClose));
       }
     } catch (error) {
-      if (error instanceof Error) {
-        // eslint-disable-next-line no-console
-        console.error("Error:", error.message);
-        setError(
-          `Error ${mode === "add" ? "creating" : "updating"} employee, try again later!`
-        );
-      } else {
-        // eslint-disable-next-line no-console
-        console.error("Error");
-        setError(
-          `Error ${mode === "add" ? "creating" : "updating"} employee, try again later!`
-        );
-      }
+      // eslint-disable-next-line no-console
+      console.error("Error" + error);
+      setError(
+        `Error ${mode === "add" ? "creating" : "updating"} employee, try again later!`
+      );
     }
   };
 
@@ -85,7 +82,7 @@ export const EmployeesAddForm = ({
     <>
       {mode === "add" ? (
         <Button color="primary" onPress={onOpen}>
-          Add Employee
+          Add User
         </Button>
       ) : (
         <button
@@ -101,36 +98,29 @@ export const EmployeesAddForm = ({
             {(onClose) => (
               <>
                 <ModalHeader className="flex flex-col gap-1">
-                  {mode === "add" ? "Add Employee" : "Update Employee"}
+                  {mode === "add" ? "Add User" : "Update User"}
                 </ModalHeader>
                 <ModalBody>
                   <Input
                     isRequired
-                    defaultValue={initialData?.firstName}
-                    errorMessage="Please enter a valid first name"
-                    label="First Name"
-                    name="firstName"
-                    placeholder="Enter first name"
-                    type="text"
+                    defaultValue={initialData?.email}
+                    errorMessage="Please enter a valid Email"
+                    label="Email"
+                    name="email"
+                    placeholder="Enter email address"
+                    startContent={
+                      <UserIcon className="text-xl text-default-400 pointer-events-none flex-shrink-0" />
+                    }
+                    type="email"
                     variant="bordered"
                   />
                   <Input
                     isRequired
-                    defaultValue={initialData?.lastName}
-                    errorMessage="Please enter a valid last name"
-                    label="Last Name"
-                    name="lastName"
-                    placeholder="Enter last name"
-                    type="text"
-                    variant="bordered"
-                  />
-                  <Input
-                    isRequired
-                    defaultValue={initialData?.username}
-                    errorMessage="Please enter a valid username"
-                    label="Username"
-                    name="username"
-                    placeholder="Enter username"
+                    defaultValue={initialData?.name}
+                    errorMessage="Please enter a valid name"
+                    label="Name"
+                    name="name"
+                    placeholder="Enter name"
                     type="text"
                     variant="bordered"
                   />
@@ -157,22 +147,6 @@ export const EmployeesAddForm = ({
                     type={isPasswordVisible ? "text" : "password"}
                     variant="bordered"
                   />
-                  <Select
-                    isRequired
-                    className="w-full"
-                    defaultSelectedKeys={
-                      initialData?.department ? [initialData.department] : []
-                    }
-                    items={departments}
-                    label="Department"
-                    name="department"
-                    placeholder="Select department"
-                    variant="bordered"
-                  >
-                    {(item) => (
-                      <SelectItem key={item.key}>{item.label}</SelectItem>
-                    )}
-                  </Select>
                   {error && <p className="text-red-500">{error}</p>}
                 </ModalBody>
                 <ModalFooter>
@@ -185,7 +159,7 @@ export const EmployeesAddForm = ({
                     Cancel
                   </Button>
                   <Button color="primary" type="submit">
-                    {mode === "add" ? "Add Employee" : "Update Employee"}
+                    {mode === "add" ? "Add User" : "Update User"}
                   </Button>
                 </ModalFooter>
               </>
