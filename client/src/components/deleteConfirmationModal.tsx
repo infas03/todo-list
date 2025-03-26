@@ -6,6 +6,7 @@ import {
   ModalFooter,
   Button,
   useDisclosure,
+  Spinner,
 } from "@heroui/react";
 import { useState } from "react";
 
@@ -14,7 +15,7 @@ import { DeleteIcon } from "./icons";
 interface DeleteConfirmationFormProps {
   id: string;
   entityName: string;
-  onConfirm: (id: string) => Promise<void>;
+  onConfirm: (id: string) => Promise<boolean>;
 }
 
 export const DeleteConfirmationForm = ({
@@ -29,19 +30,12 @@ export const DeleteConfirmationForm = ({
   const handleDelete = async () => {
     setError(null);
     setIsDeleting(true);
+    const success = await onConfirm(id);
 
-    try {
-      await onConfirm(id);
+    if (!success) {
+      setError(`Failed to delete ${entityName}`);
+    } else {
       onOpenChange();
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : `Error deleting ${entityName}`;
-
-      setError(errorMessage);
-
-      // eslint-disable-next-line no-console
-      console.error(`Error deleting ${entityName}:`, errorMessage);
-    } finally {
       setIsDeleting(false);
     }
   };
@@ -49,7 +43,7 @@ export const DeleteConfirmationForm = ({
   return (
     <>
       <button className="text-red-500 hover:text-red-700" onClick={onOpen}>
-        <DeleteIcon />
+        {isDeleting ? <Spinner color="primary" /> : <DeleteIcon />}
       </button>
       <Modal isOpen={isOpen} placement="top-center" onOpenChange={onOpenChange}>
         <ModalContent>

@@ -83,11 +83,12 @@ export const updateTask = (
   onClose?: () => void
 ) => {
   return async (dispatch: any): Promise<void> => {
+    console.log('taskId: ', taskId)
     try {
       const response = await api.patch(`/tasks/${values.id}`, values);
 
       if (response.data.success) {
-        dispatch(getAllTasks());
+        await dispatch(getAllTasks());
         ToastBar.success(response.data.message);
         onClose && onClose();
         setIsLoading && setIsLoading(false);
@@ -104,23 +105,18 @@ export const updateTask = (
   };
 };
 
-export const deleteTask = (
-  taskId: string,
-  fetchTask: () => void,
-  setIsLoadingDelete: (taskId: string, loading: boolean) => void
-) => {
-  return async (): Promise<void> => {
+export const deleteTask = (taskId: string) => {
+  return async (dispatch: any): Promise<void> => {
+
     try {
       const response = await api.delete(`/tasks/${taskId}`);
 
       if (response.data.success) {
-        fetchTask();
+        await dispatch(getAllTasks());
         ToastBar.success(response.data.message);
-        setIsLoadingDelete && taskId && setIsLoadingDelete(taskId, false);
       }
     } catch (error: any) {
       ToastBar.warning(error.response.data.message);
-      setIsLoadingDelete && taskId && setIsLoadingDelete(taskId, false);
     }
   };
 };

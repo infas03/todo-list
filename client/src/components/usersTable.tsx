@@ -45,11 +45,13 @@ export const UsersTable = () => {
     fetchUsers();
   }, []);
 
-  const handleDeleteEmployee = async (userId: string) => {
+  const handleDeleteEmployee = async (userId: string): Promise<boolean> => {
     try {
-      dispatch(userDelete(userId));
+      await dispatch(userDelete(userId));
+
+      return true;
     } catch {
-      throw new Error("Failed to delete employee");
+      return false;
     }
   };
 

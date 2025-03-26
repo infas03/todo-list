@@ -49,16 +49,11 @@ export const UserTaskTable = () => {
   const [isLoadingDepend, setIsLoadingDepend] = useState<
     Record<string, boolean>
   >({});
-  const [isLoadingDelete, setIsLoadingDelete] = useState<
-    Record<string, boolean>
-  >({});
   const [mainFilter, setMainFilter] = useState<string | undefined>("dueDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [searchTerm, setSearchTerm] = useState("");
 
   const { userDetails } = useAuth();
-
-  console.log("check: ", isLoadingDepend);
 
   const fetchTasks = async () => {
     setIsLoading(true);
@@ -149,23 +144,16 @@ export const UserTaskTable = () => {
     }
   };
 
-  const handleDeleteTask = async (taskId: string) => {
-    setIsLoadingDelete((prevState) => ({
-      ...prevState,
-      [taskId]: true,
-    }));
-
+  const handleDeleteTask = async (taskId: string): Promise<boolean> => {
     try {
-      await dispatch(
-        deleteTask(taskId, fetchTasks, (taskId: string, loading: boolean) =>
-          setIsLoadingDelete((prevState) => ({
-            ...prevState,
-            [taskId]: loading,
-          }))
-        )
-      );
-    } catch {
-      throw new Error("Failed to delete employee");
+      await dispatch(deleteTask(taskId));
+
+      return true;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("error: ", error);
+
+      return false;
     }
   };
 
@@ -196,6 +184,10 @@ export const UserTaskTable = () => {
       )
     );
   };
+
+  useEffect(() => {
+    console.log("isLoadingDepend: ", isLoadingDepend);
+  }, []);
 
   return (
     <div className="p-4 w-full">
@@ -333,15 +325,11 @@ export const UserTaskTable = () => {
                             />
                             <TaskForm mode="edit" task={item} />
                             <div>
-                              {isLoadingDelete[item.id] ? (
-                                <Spinner color="primary" />
-                              ) : (
-                                <DeleteConfirmationForm
-                                  entityName="task"
-                                  id={item.id!}
-                                  onConfirm={handleDeleteTask}
-                                />
-                              )}
+                              <DeleteConfirmationForm
+                                entityName="task"
+                                id={item.id!}
+                                onConfirm={handleDeleteTask}
+                              />
                             </div>
                           </div>
                         )}
