@@ -14,6 +14,7 @@ export enum TaskStatus {
 export interface Recurrence {
   pattern: 'daily' | 'weekly' | 'monthly' | 'yearly';
   nextOccurrence: Date;
+  isGeneratedInstance?: boolean;
 }
 
 export interface ITask extends Document {

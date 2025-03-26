@@ -45,6 +45,14 @@ export const priorities = [
   { key: "high", label: "High" },
 ];
 
+export const recurrenceOptions = [
+  { key: "none", label: "None" },
+  { key: "daily", label: "Every day" },
+  { key: "weekly", label: "Every week" },
+  { key: "monthly", label: "Every month" },
+  { key: "yearly", label: "Every year" },
+];
+
 export const userTaskTableColumns = [
   {
     key: "name",

@@ -17,7 +17,7 @@ import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 
-import { priorities } from "@/config/staticValue";
+import { priorities, recurrenceOptions } from "@/config/staticValue";
 import { AssignFormData, Task } from "@/types";
 import { createTask, updateTask } from "@/redux/actions/taskAction";
 import { RootState } from "@/redux/store";
@@ -37,6 +37,10 @@ export const TaskForm = ({ mode = "create", task }: TaskFormProps) => {
     description: "",
     priority: "",
     dueDate: "",
+    recurrence: {
+      startDate: "",
+      pattern: "",
+    },
   });
 
   useEffect(() => {
@@ -47,6 +51,10 @@ export const TaskForm = ({ mode = "create", task }: TaskFormProps) => {
         description: task.description || "",
         priority: task.priority,
         dueDate: task.dueDate?.split("T")[0] || "",
+        recurrence: {
+          pattern: task?.recurrence?.pattern || "",
+          startDate: task?.recurrence?.startDate || "",
+        },
       });
     }
   }, [mode, task]);
@@ -62,16 +70,31 @@ export const TaskForm = ({ mode = "create", task }: TaskFormProps) => {
       new FormData(e.currentTarget),
     ) as unknown as AssignFormData;
 
+    const addData = {
+      ...data,
+      recurrence: {
+        pattern: data.recurrence,
+        startDate: data.dueDate,
+      },
+    };
+
     const updateData = {
       ...data,
       id: task?.id,
+      recurrence: {
+        pattern: data.recurrence,
+        startDate: data.dueDate,
+      },
     };
+
+    console.log('addData: ', addData)
+    console.log('updateData: ', updateData)
 
     try {
       if (mode === "edit" && task) {
         await dispatch(updateTask(updateData, onClose));
       } else {
-        await dispatch(createTask(data, onClose));
+        await dispatch(createTask(addData, onClose));
       }
     } catch (error) {
       const errorMessage =
@@ -146,6 +169,22 @@ export const TaskForm = ({ mode = "create", task }: TaskFormProps) => {
                     type="date"
                     variant="bordered"
                   />
+                  <Select
+                    isRequired
+                    className="w-full"
+                    defaultSelectedKeys={[
+                      formData.recurrence?.pattern || "none",
+                    ]}
+                    items={recurrenceOptions}
+                    label="Recurrence"
+                    name="recurrence"
+                    placeholder="Select recurrence"
+                    variant="bordered"
+                  >
+                    {(item) => (
+                      <SelectItem key={item.key}>{item.label}</SelectItem>
+                    )}
+                  </Select>
                   {error && <p className="text-red-500">{error}</p>}
                 </ModalBody>
                 <ModalFooter>

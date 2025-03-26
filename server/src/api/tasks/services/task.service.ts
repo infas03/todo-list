@@ -1,10 +1,10 @@
-import { TaskRepository } from '../repositories/task.repository';
-import { 
+import { TaskRepository } from "../repositories/task.repository";
+import {
   TaskResponse,
   TaskPriority,
-  TaskStatus
-} from '../interfaces/task.interface';
-import { CreateTaskDto, UpdateTaskDto } from '../dtos/create-task.dto';
+  TaskStatus,
+} from "../interfaces/task.interface";
+import { CreateTaskDto, UpdateTaskDto } from "../dtos/create-task.dto";
 
 export class TaskService {
   constructor(private readonly taskRepo: TaskRepository) {}
@@ -21,7 +21,7 @@ export class TaskService {
       dependencies: task.dependencies,
       user: task.user.toString(),
       createdAt: task.createdAt,
-      updatedAt: task.updatedAt
+      updatedAt: task.updatedAt,
     };
   }
 
@@ -31,13 +31,16 @@ export class TaskService {
       status: data.status || TaskStatus.NOT_DONE,
       priority: data.priority || TaskPriority.MEDIUM,
       user: userId,
-      dependencies: data.dependencies || []
+      dependencies: data.dependencies || [],
     };
 
     if (data.recurrence) {
       taskData.recurrence = {
         pattern: data.recurrence.pattern,
-        nextOccurrence: this.calculateNextOccurrence(data.recurrence)
+        nextOccurrence: this.calculateNextOccurrence({
+          pattern: data.recurrence.pattern,
+          startDate: data.dueDate || new Date()
+        }),
       };
     }
 
@@ -46,7 +49,7 @@ export class TaskService {
   }
 
   async getUserTasks(
-    userId: string, 
+    userId: string,
     filters: { mainFilter?: string; sortOrder?: string; search?: string } = {}
   ): Promise<TaskResponse[]> {
     const tasks = await this.taskRepo.findByUser(userId, filters);
@@ -55,35 +58,47 @@ export class TaskService {
 
   async getTask(id: string, userId: string): Promise<TaskResponse | null> {
     const task = await this.taskRepo.findById(id);
-    
+
     if (!task || task.user.toString() !== userId) {
-        return null;
+      return null;
     }
 
     return this.toResponse(task);
-}
+  }
 
   async updateTask(
-    id: string, 
-    updates: UpdateTaskDto, 
+    id: string,
+    updates: UpdateTaskDto,
     userId: string
   ): Promise<TaskResponse> {
     const existingTask = await this.taskRepo.findById(id);
     if (!existingTask || existingTask.user.toString() !== userId) {
-      throw new Error('Task not found or unauthorized');
+      throw new Error("Task not found or unauthorized");
     }
 
     if (updates.status === TaskStatus.DONE) {
       await this.validateTaskCompletion(id, userId);
+
+      if (existingTask.recurrence?.pattern) {
+        const nextTask = {
+          ...existingTask.toObject(),
+          _id: undefined,
+          status: TaskStatus.NOT_DONE,
+          dueDate: this.calculateNextOccurrence({
+            pattern: existingTask.recurrence.pattern,
+            startDate: existingTask.dueDate
+          }),
+          dependencies: existingTask.dependencies.map(dep => dep.toString()),
+          user: userId
+        };
+        await this.taskRepo.create(nextTask);
+      }
     }
 
-    if (updates.recurrence) {
-      const existingRecurrence = (existingTask as any).recurrence;
-
+    if (updates.recurrence?.pattern) {
       updates.recurrence.nextOccurrence = this.calculateNextOccurrence({
-        pattern: updates.recurrence.pattern!,
-        nextOccurrence: existingRecurrence?.nextOccurrence,
-        startDate: existingRecurrence?.nextOccurrence
+        pattern: updates.recurrence.pattern,
+        startDate: existingTask.dueDate
       });
     }
 
@@ -94,16 +109,16 @@ export class TaskService {
   async deleteTask(id: string, userId: string): Promise<{ success: boolean }> {
     const task = await this.taskRepo.findById(id);
     if (!task || task.user.toString() !== userId) {
-      throw new Error('Task not found or unauthorized');
+      throw new Error("Task not found or unauthorized");
     }
 
     const allUserTasks = await this.taskRepo.findByUser(userId);
-    const dependentTasks = allUserTasks.filter(t => 
+    const dependentTasks = allUserTasks.filter((t) =>
       (t as any).dependencies?.includes(id)
     );
-    
+
     if (dependentTasks.length > 0) {
-      throw new Error('Cannot delete task as other tasks depend on it');
+      throw new Error("Cannot delete task as other tasks depend on it");
     }
 
     await this.taskRepo.delete(id);
@@ -116,7 +131,7 @@ export class TaskService {
 
     for (const task of recurringTasks) {
       const taskObj = task as any;
-      
+
       if (taskObj.user.toString() !== userId) continue;
 
       const newTaskData = {
@@ -130,7 +145,7 @@ export class TaskService {
         user: taskObj.user,
         recurrence: {
           pattern: taskObj.recurrence.pattern,
-          nextOccurrence: this.calculateNextOccurrence(taskObj.recurrence)
+          nextOccurrence: this.calculateNextOccurrence(taskObj.recurrence),
         },
       };
 
@@ -139,37 +154,56 @@ export class TaskService {
       await this.taskRepo.update(taskObj._id, {
         recurrence: {
           ...taskObj.recurrence,
-          nextOccurrence: this.calculateNextOccurrence(taskObj.recurrence)
-        }
+          nextOccurrence: this.calculateNextOccurrence(taskObj.recurrence),
+        },
       } as UpdateTaskDto);
     }
   }
 
-  private async validateTaskCompletion(taskId: string, userId: string): Promise<void> {
+  private async validateTaskCompletion(
+    taskId: string,
+    userId: string
+  ): Promise<void> {
     const task = await this.taskRepo.findById(taskId);
-    if (!task) throw new Error('Task not found');
+    if (!task) throw new Error("Task not found");
 
-    const dependencyIds = task.dependencies.map(id => id.toString());
-    
+    const dependencyIds = task.dependencies.map((id) => id.toString());
+
     if (task.dependencies.length > 0) {
-      const dependencies = await this.taskRepo.findTasksWithDependencies(dependencyIds);
-      
+      const dependencies = await this.taskRepo.findTasksWithDependencies(
+        dependencyIds
+      );
+
       const incompleteDependencies = dependencies.filter(
-        dep => dep.status !== TaskStatus.DONE && dep.user.toString() === userId
+        (dep) =>
+          dep.status !== TaskStatus.DONE && dep.user.toString() === userId
       );
 
       if (incompleteDependencies.length > 0) {
-        throw new Error('Cannot complete task: dependencies not fulfilled');
+        throw new Error("Cannot complete task: dependencies not fulfilled");
       }
     }
   }
 
+  // private async createNextRecurrence(task: TaskResponse) {
+  //   const nextTask = {
+  //     ...task,
+  //     dueDate: this.calculateNextDate(task.recurrence!.pattern),
+  //     status: TaskStatus.NOT_DONE,
+  //     recurrence: {
+  //       pattern: task.recurrence!.pattern,
+  //       nextOccurrence: this.calculateNextDate(task.recurrence!.pattern),
+  //     },
+  //   };
+
+  //   await this.taskRepo.create(nextTask);
+  // }
+  
   private calculateNextOccurrence(recurrence: {
     pattern: 'daily' | 'weekly' | 'monthly' | 'yearly';
-    startDate?: Date;
-    nextOccurrence?: Date;
+    startDate: Date;
   }): Date {
-    const nextDate = new Date(recurrence.nextOccurrence || recurrence.startDate || new Date());
+    const nextDate = new Date(recurrence.startDate);
     
     switch (recurrence.pattern) {
       case 'daily':
@@ -180,12 +214,15 @@ export class TaskService {
         break;
       case 'monthly':
         nextDate.setMonth(nextDate.getMonth() + 1);
+        if (nextDate.getMonth() !== (recurrence.startDate.getMonth() + 1) % 12) {
+          nextDate.setDate(0);
+        }
         break;
       case 'yearly':
         nextDate.setFullYear(nextDate.getFullYear() + 1);
         break;
     }
-
+    
     return nextDate;
   }
 
@@ -197,7 +234,7 @@ export class TaskService {
   ): Promise<TaskResponse> {
     const existingTask = await this.taskRepo.findById(taskId);
     if (!existingTask || existingTask.user.toString() !== userId) {
-      throw new Error('Task not found or unauthorized');
+      throw new Error("Task not found or unauthorized");
     }
 
     // Validate completion if marking as done

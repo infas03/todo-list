@@ -59,7 +59,7 @@ export class CreateTaskDto {
 
   @IsDateString()
   @IsOptional()
-  dueDate?: Date;
+  dueDate: Date;
 
   @IsOptional()
   @ValidateNested()
@@ -94,7 +94,7 @@ export class UpdateTaskDto {
 
   @IsOptional()
   @IsDateString()
-  dueDate?: Date | null;
+  dueDate: Date;
 
   @IsOptional()
   @ValidateNested()

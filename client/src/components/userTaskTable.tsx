@@ -135,10 +135,7 @@ export const UserTaskTable = () => {
 
   return (
     <div className="p-4 w-full">
-      <div className="flex justify-between items-center mb-4 text-sm">
-        <h1 className="">
-          {task?.totalTasks} active tasks, {task?.finishedTasks} completed
-        </h1>
+      <div className="flex justify-end items-center mb-4 text-sm">
         <div className="flex items-center gap-x-2">
           <Input
             className="w-48"

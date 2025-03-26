@@ -6,12 +6,13 @@ export interface ITask extends Document {
   description?: string;
   status: TaskStatus;
   priority: TaskPriority;
-  dueDate?: Date;
+  dueDate: Date;
   recurrence?: Recurrence;
   dependencies: Types.ObjectId[];
   user: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  isRecurringInstance?: boolean;
 }
 
 const recurrenceSchema = new Schema<Recurrence>({

@@ -12,12 +12,18 @@ export interface User {
   totalTasks?: number;
 }
 
+export interface Recurrence {
+  pattern: string;
+  startDate: string;
+}
+
 export interface AssignFormData {
   id?: string;
   title: string;
   priority: string;
   description: string;
   dueDate: string;
+  recurrence: Recurrence;
 }
 
 export interface LoginFormData {
@@ -33,4 +39,5 @@ export interface Task {
   priority: string;
   dueDate: string;
   dependencies: string[];
+  recurrence?: Recurrence;
 }
