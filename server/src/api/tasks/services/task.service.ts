@@ -44,7 +44,7 @@ export class TaskService {
         }),
       };
     } else {
-      delete taskData.recurrence;
+      taskData.recurrence = undefined;
     }
 
     const task = await this.taskRepo.create(taskData);
@@ -116,7 +116,7 @@ export class TaskService {
     }
 
     if (task.recurrence && task.recurrence.pattern === "none") {
-      delete task.recurrence
+      task.recurrence = undefined;
     }
 
     const allUserTasks = await this.taskRepo.findByUser(userId);
