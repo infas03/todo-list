@@ -52,7 +52,6 @@ export const UserTaskTable = () => {
   const [mainFilter, setMainFilter] = useState<string | undefined>("dueDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [searchTerm, setSearchTerm] = useState("");
-  const [version, setVersion] = useState(0);
 
   const { userDetails } = useAuth();
 
@@ -95,75 +94,46 @@ export const UserTaskTable = () => {
     }
   };
 
-  // const handleCheckboxChange = async (
-  //   taskId: string,
-  //   currentStatus: string
-  // ) => {
-  //   try {
-  //     setIsLoadingStatus((prevState) => ({
-  //       ...prevState,
-  //       [taskId]: true,
-  //     }));
+  const handleCheckboxChange = async (
+    taskId: string,
+    currentStatus: string
+  ) => {
+    try {
+      setIsLoadingStatus((prevState) => ({
+        ...prevState,
+        [taskId]: true,
+      }));
 
-  //     const updatedStatus = currentStatus === "done" ? "not_done" : "done";
+      const updatedStatus = currentStatus === "done" ? "not_done" : "done";
 
-  //     const updateData = {
-  //       id: taskId,
-  //       status: updatedStatus,
-  //     };
+      const updateData = {
+        id: taskId,
+        status: updatedStatus,
+      };
 
-  //     await dispatch(
-  //       updateTask(
-  //         updateData,
-  //         setIsLoading,
-  //         taskId,
-  //         (id, loading) =>
-  //           setIsLoadingStatus((prev) => ({ ...prev, [id]: loading })),
-  //         (id, loading) =>
-  //           setIsLoadingDepend((prev) => ({ ...prev, [id]: loading })),
-  //       ),
-  //     );
-  //   } catch (error: any) {
-  //     // eslint-disable-next-line no-console
-  //     console.error("error" + error);
+      const success = await dispatch(
+        updateTask(
+          updateData,
+          setIsLoading,
+          taskId,
+          (id, loading) =>
+            setIsLoadingStatus((prev) => ({ ...prev, [id]: loading })),
+          (id, loading) =>
+            setIsLoadingDepend((prev) => ({ ...prev, [id]: loading })),
+        ),
+      );
 
-  //     setIsLoadingStatus((prev) => ({ ...prev, [taskId]: false }));
-  //   }
-  // };
-
-  const handleCheckboxChange = useCallback(
-    async (taskId: string, currentStatus: string) => {
-      try {
-        setIsLoadingStatus((prev) => ({ ...prev, [taskId]: true }));
-
-        const updatedStatus = currentStatus === "done" ? "not_done" : "done";
-
-        const updateData = {
-          id: taskId,
-          status: updatedStatus,
-        };
-
-        await dispatch(
-          updateTask(
-            updateData,
-            setIsLoading,
-            taskId,
-            (id, loading) =>
-              setIsLoadingStatus((prev) => ({ ...prev, [id]: loading })),
-            (id, loading) =>
-              setIsLoadingDepend((prev) => ({ ...prev, [id]: loading })),
-          ),
-        );
-
-        setVersion((v) => v + 1);
-      } catch (error) {
-        console.error("Update failed:", error);
-      } finally {
-        setIsLoadingStatus((prev) => ({ ...prev, [taskId]: false }));
+      if (success) {
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        await dispatch(getAllTasks());
       }
-    },
-    [],
-  );
+    } catch (error: any) {
+      // eslint-disable-next-line no-console
+      console.error("error" + error);
+
+      setIsLoadingStatus((prev) => ({ ...prev, [taskId]: false }));
+    }
+  };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -267,7 +237,6 @@ export const UserTaskTable = () => {
         ) : (
           <>
             <Table
-              key={`table-${version}`}
               aria-label="Example table with dynamic content"
               className="max-w-6xl"
             >
