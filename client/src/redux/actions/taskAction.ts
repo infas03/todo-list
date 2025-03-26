@@ -88,6 +88,7 @@ export const updateTask = (
       const response = await api.patch(`/tasks/${values.id}`, values);
 
       if (response.data.success) {
+        await dispatch(getAllTasks());
         ToastBar.success(response.data.message);
         onClose && onClose();
 
@@ -104,7 +105,6 @@ export const updateTask = (
       setIsLoading && setIsLoading(false);
       setIsLoadingStatus && taskId && setIsLoadingStatus(taskId, false);
       setIsLoadingDepend && taskId && setIsLoadingDepend(taskId, false);
-      await dispatch(getAllTasks());
     }
   };
 };

@@ -7,7 +7,7 @@ import {
   TableCell,
   getKeyValue,
 } from "@heroui/table";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Checkbox,
@@ -52,6 +52,7 @@ export const UserTaskTable = () => {
   const [mainFilter, setMainFilter] = useState<string | undefined>("dueDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [searchTerm, setSearchTerm] = useState("");
+  const [version, setVersion] = useState(0);
 
   const { userDetails } = useAuth();
 
@@ -94,41 +95,75 @@ export const UserTaskTable = () => {
     }
   };
 
-  const handleCheckboxChange = async (
-    taskId: string,
-    currentStatus: string
-  ) => {
-    try {
-      setIsLoadingStatus((prevState) => ({
-        ...prevState,
-        [taskId]: true,
-      }));
+  // const handleCheckboxChange = async (
+  //   taskId: string,
+  //   currentStatus: string
+  // ) => {
+  //   try {
+  //     setIsLoadingStatus((prevState) => ({
+  //       ...prevState,
+  //       [taskId]: true,
+  //     }));
 
-      const updatedStatus = currentStatus === "done" ? "not_done" : "done";
+  //     const updatedStatus = currentStatus === "done" ? "not_done" : "done";
 
-      const updateData = {
-        id: taskId,
-        status: updatedStatus,
-      };
+  //     const updateData = {
+  //       id: taskId,
+  //       status: updatedStatus,
+  //     };
 
-      await dispatch(
-        updateTask(
-          updateData,
-          setIsLoading,
-          taskId,
-          (id, loading) =>
-            setIsLoadingStatus((prev) => ({ ...prev, [id]: loading })),
-          (id, loading) =>
-            setIsLoadingDepend((prev) => ({ ...prev, [id]: loading })),
-        ),
-      );
-    } catch (error: any) {
-      // eslint-disable-next-line no-console
-      console.error("error" + error);
+  //     await dispatch(
+  //       updateTask(
+  //         updateData,
+  //         setIsLoading,
+  //         taskId,
+  //         (id, loading) =>
+  //           setIsLoadingStatus((prev) => ({ ...prev, [id]: loading })),
+  //         (id, loading) =>
+  //           setIsLoadingDepend((prev) => ({ ...prev, [id]: loading })),
+  //       ),
+  //     );
+  //   } catch (error: any) {
+  //     // eslint-disable-next-line no-console
+  //     console.error("error" + error);
 
-      setIsLoadingStatus((prev) => ({ ...prev, [taskId]: false }));
-    }
-  };
+  //     setIsLoadingStatus((prev) => ({ ...prev, [taskId]: false }));
+  //   }
+  // };
+
+  const handleCheckboxChange = useCallback(
+    async (taskId: string, currentStatus: string) => {
+      try {
+        setIsLoadingStatus((prev) => ({ ...prev, [taskId]: true }));
+
+        const updatedStatus = currentStatus === "done" ? "not_done" : "done";
+
+        const updateData = {
+          id: taskId,
+          status: updatedStatus,
+        };
+
+        await dispatch(
+          updateTask(
+            updateData,
+            setIsLoading,
+            taskId,
+            (id, loading) =>
+              setIsLoadingStatus((prev) => ({ ...prev, [id]: loading })),
+            (id, loading) =>
+              setIsLoadingDepend((prev) => ({ ...prev, [id]: loading })),
+          ),
+        );
+
+        setVersion((v) => v + 1);
+      } catch (error) {
+        console.error("Update failed:", error);
+      } finally {
+        setIsLoadingStatus((prev) => ({ ...prev, [taskId]: false }));
+      }
+    },
+    [],
+  );
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -155,7 +190,7 @@ export const UserTaskTable = () => {
 
   const handleDependenciesSelected = (
     taskId: string,
-    selectedIds: string[]
+    selectedIds: string[],
   ) => {
     setIsLoadingDepend((prevState) => ({
       ...prevState,
@@ -176,8 +211,8 @@ export const UserTaskTable = () => {
           setIsLoadingDepend((prevState) => ({
             ...prevState,
             [taskId]: loading,
-          }))
-      )
+          })),
+      ),
     );
   };
 
@@ -185,9 +220,9 @@ export const UserTaskTable = () => {
     console.log("isLoadingDepend: ", isLoadingDepend);
   }, []);
   useEffect(() => {
-    console.log('isLoadingStatus changed:', isLoadingStatus);
+    console.log("isLoadingStatus changed:", isLoadingStatus);
   }, [isLoadingStatus]);
-  
+
   return (
     <div className="p-4 w-full">
       <div className="flex justify-end items-center mb-4 text-sm">
@@ -232,6 +267,7 @@ export const UserTaskTable = () => {
         ) : (
           <>
             <Table
+              key={`table-${version}`}
               aria-label="Example table with dynamic content"
               className="max-w-6xl"
             >
@@ -285,7 +321,7 @@ export const UserTaskTable = () => {
                                 month: "long",
                                 day: "numeric",
                                 year: "numeric",
-                              }
+                              },
                             )}
                             variant="bordered"
                           />
