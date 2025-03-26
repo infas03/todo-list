@@ -23,19 +23,18 @@ import { AnyAction } from "redux";
 import { useAuth } from "../context/AuthProvider";
 import { taskFilter, userTaskTableColumns } from "../config/staticValue";
 import { Task } from "../types";
+import { RootState } from "../redux/store";
+import {
+  deleteTask,
+  getAllTasks,
+  updateTask,
+} from "../redux/actions/taskAction";
 
 import { EmployerTableSkeleton } from "./skeleton/employerTableSkeleton";
 import { FilterSwitch } from "./filterSwitch";
 import { TaskForm } from "./taskForm";
 import { DeleteConfirmationForm } from "./deleteConfirmationModal";
 import { AddDependenciesButton } from "./addDependenciesButton";
-
-import { RootState } from "@/redux/store";
-import {
-  deleteTask,
-  getAllTasks,
-  updateTask,
-} from "@/redux/actions/taskAction";
 
 export const UserTaskTable = () => {
   const dispatch: ThunkDispatch<RootState, unknown, AnyAction> = useDispatch();

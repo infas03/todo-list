@@ -14,11 +14,11 @@ import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 import { useDispatch } from "react-redux";
 
-import { EditIcon, EyeFilledIcon, EyeSlashFilledIcon, UserIcon } from "./icons";
+import { AddUserFormData } from "../types";
+import { RootState } from "../redux/store";
+import { userRegister, userUpdate } from "../redux/actions/userAction";
 
-import { AddUserFormData } from "@/types";
-import { RootState } from "@/redux/store";
-import { userRegister, userUpdate } from "@/redux/actions/userAction";
+import { EditIcon, EyeFilledIcon, EyeSlashFilledIcon, UserIcon } from "./icons";
 
 interface UserAddFormProps {
   mode?: "add" | "update";
@@ -47,7 +47,7 @@ export const UserAddForm = ({
     e.preventDefault();
 
     const data = Object.fromEntries(
-      new FormData(e.currentTarget)
+      new FormData(e.currentTarget),
     ) as unknown as AddUserFormData;
 
     if (!userId && mode === "update") {
@@ -61,7 +61,7 @@ export const UserAddForm = ({
       _id: userId as string,
     };
 
-    console.log('updateDate: ', updateData);
+    console.log("updateDate: ", updateData);
 
     try {
       if (mode === "add") {
@@ -73,7 +73,7 @@ export const UserAddForm = ({
       // eslint-disable-next-line no-console
       console.error("Error" + error);
       setError(
-        `Error ${mode === "add" ? "creating" : "updating"} employee, try again later!`
+        `Error ${mode === "add" ? "creating" : "updating"} employee, try again later!`,
       );
     }
   };

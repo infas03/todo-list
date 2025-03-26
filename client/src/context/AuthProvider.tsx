@@ -9,12 +9,11 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { Role } from "../constants/role";
 import { User } from "../types";
-
-import { RootState } from "@/redux/store";
+import { RootState } from "../redux/store";
 import {
   loginUserSuccess,
   logoutUserSuccess,
-} from "@/redux/actions/userAction";
+} from "../redux/actions/userAction";
 
 type AuthContextType = {
   isLoggedIn: boolean;
@@ -54,7 +53,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setIsLoggedIn(true);
       setToken(storedToken);
       setRole(userDetailsState.role);
-      setUserDetails(userDetailsState ? userDetailsState : null); 
+      setUserDetails(userDetailsState ? userDetailsState : null);
     }
 
     setResolved(true);

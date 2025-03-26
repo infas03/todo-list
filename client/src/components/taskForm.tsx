@@ -17,10 +17,10 @@ import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 
-import { priorities, recurrenceOptions } from "@/config/staticValue";
-import { AssignFormData, Task } from "@/types";
-import { createTask, updateTask } from "@/redux/actions/taskAction";
-import { RootState } from "@/redux/store";
+import { priorities, recurrenceOptions } from "../config/staticValue";
+import { AssignFormData, Task } from "../types";
+import { createTask, updateTask } from "../redux/actions/taskAction";
+import { RootState } from "../redux/store";
 
 interface TaskFormProps {
   mode?: "create" | "edit";
