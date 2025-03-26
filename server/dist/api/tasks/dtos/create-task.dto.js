@@ -13,7 +13,7 @@ exports.UpdateTaskDto = exports.CreateTaskDto = exports.UpdateRecurrenceDto = ex
 const class_validator_1 = require("class-validator");
 const task_interface_1 = require("../interfaces/task.interface");
 const class_transformer_1 = require("class-transformer");
-const RECURRENCE_PATTERNS = ['daily', 'weekly', 'monthly', 'yearly'];
+const RECURRENCE_PATTERNS = ['daily', 'weekly', 'monthly', 'yearly', 'none'];
 class RecurrenceDto {
 }
 exports.RecurrenceDto = RecurrenceDto;

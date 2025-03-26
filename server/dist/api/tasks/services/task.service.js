@@ -32,15 +32,19 @@ class TaskService {
     }
     createTask(data, userId) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log('data: ', data);
             const taskData = Object.assign(Object.assign({}, data), { status: data.status || task_interface_1.TaskStatus.NOT_DONE, priority: data.priority || task_interface_1.TaskPriority.MEDIUM, user: userId, dependencies: data.dependencies || [] });
-            if (data.recurrence) {
+            if (data.recurrence && data.recurrence.pattern !== 'none') {
                 taskData.recurrence = {
                     pattern: data.recurrence.pattern,
                     nextOccurrence: this.calculateNextOccurrence({
-                        pattern: data.recurrence.pattern,
+                        pattern: data.recurrence.pattern || 'none',
                         startDate: data.dueDate || new Date()
                     }),
                 };
+            }
+            else {
+                taskData.recurrence = undefined;
             }
             const task = yield this.taskRepo.create(taskData);
             return this.toResponse(task);
@@ -93,6 +97,9 @@ class TaskService {
             const task = yield this.taskRepo.findById(id);
             if (!task || task.user.toString() !== userId) {
                 throw new Error("Task not found or unauthorized");
+            }
+            if (task.recurrence && task.recurrence.pattern === "none") {
+                task.recurrence = undefined;
             }
             const allUserTasks = yield this.taskRepo.findByUser(userId);
             const dependentTasks = allUserTasks.filter((t) => { var _a; return (_a = t.dependencies) === null || _a === void 0 ? void 0 : _a.includes(id); });

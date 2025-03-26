@@ -4,8 +4,8 @@ exports.Task = void 0;
 const mongoose_1 = require("mongoose");
 const tasks_1 = require("../../../api/tasks");
 const recurrenceSchema = new mongoose_1.Schema({
-    pattern: { type: String, required: true, enum: ['daily', 'weekly', 'monthly', 'yearly'] },
-    nextOccurrence: { type: Date, required: true }
+    pattern: { type: String, enum: ['daily', 'weekly', 'monthly', 'yearly', 'none'] },
+    nextOccurrence: { type: Date }
 });
 const taskSchema = new mongoose_1.Schema({
     title: { type: String, required: true },
