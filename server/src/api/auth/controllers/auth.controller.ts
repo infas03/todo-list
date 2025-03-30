@@ -37,7 +37,6 @@ export class AuthController {
   }
 
   async login(req: Request, res: Response) {
-    console.log('login req.body: ', req.body);
     try {
       const result = await this.authService.login(req.body as LoginDto);
       
