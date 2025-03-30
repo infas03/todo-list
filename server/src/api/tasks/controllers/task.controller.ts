@@ -160,22 +160,4 @@ export class TaskController {
       });
     }
   }
-
-  async processRecurringTasks(req: Request, res: Response): Promise<void> {
-    try {
-      await this.taskService.handleRecurringTasks(req.user.id);
-
-      this.sendResponse(res, {
-        success: true,
-        statusCode: HttpStatus.OK,
-        message: "Recurring tasks processed successfully",
-      });
-    } catch (error) {
-      this.sendResponse(res, {
-        success: false,
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: (error as Error).message,
-      });
-    }
-  }
 }

@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import compression from 'compression';
 import { config } from '../core/config';
+import routes from '../routes/index'
 
 export const loadExpressApp = (): Application => {
   const app = express();
@@ -16,6 +17,8 @@ export const loadExpressApp = (): Application => {
   app.use(compression());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
+  app.use('/api', routes); 
 
   if (config.NODE_ENV !== 'test') {
     app.use(morgan('dev'));
