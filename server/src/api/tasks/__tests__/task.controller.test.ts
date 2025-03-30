@@ -6,7 +6,11 @@ import { TaskStatus, TaskPriority } from '../interfaces/task.interface';
 
 jest.mock('../services/task.service', () => ({
   TaskService: jest.fn().mockImplementation(() => ({
-    createTask: jest.fn()
+    createTask: jest.fn(),
+    getTask: jest.fn(),
+    getUserTasks: jest.fn(),
+    updateTask: jest.fn(),
+    deleteTask: jest.fn(),
   }))
 }));
 
@@ -14,7 +18,7 @@ jest.mock('../repositories/task.repository', () => ({
   TaskRepository: jest.fn().mockImplementation(() => ({}))
 }));
 
-describe('TaskController - createTask', () => {
+describe('TaskController', () => {
   let controller: TaskController;
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
@@ -33,73 +37,103 @@ describe('TaskController - createTask', () => {
 
     mockRequest = {
       user: { id: 'user123' },
-      body: {}
+      body: {},
+      params: { id: 'task123' }
     };
   });
 
-  it('should successfully create a task', async () => {
-    const taskData: CreateTaskDto = {
-      title: 'Test Task',
-      description: 'Test Description',
-      dueDate: new Date(),
-      status: TaskStatus.NOT_DONE,
-      priority: TaskPriority.MEDIUM
-    };
+  describe('createTask', () => {
+    it('should successfully create a task', async () => {
+      const taskData: CreateTaskDto = {
+        title: 'Test Task',
+        description: 'Test Description',
+        dueDate: new Date(),
+        status: TaskStatus.NOT_DONE,
+        priority: TaskPriority.MEDIUM
+      };
 
-    const mockTask = {
-      id: 'task123',
-      ...taskData,
-      user: 'user123',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+      const mockTask = {
+        id: 'task123',
+        ...taskData,
+        user: 'user123',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
 
-    (controller as any).taskService.createTask.mockResolvedValue(mockTask);
-    mockRequest.body = taskData;
+      (controller as any).taskService.createTask.mockResolvedValue(mockTask);
+      mockRequest.body = taskData;
 
-    await controller.createTask(mockRequest as Request, mockResponse as Response);
+      await controller.createTask(mockRequest as Request, mockResponse as Response);
 
-    expect((controller as any).taskService.createTask).toHaveBeenCalledWith(
-      taskData,
-      'user123'
-    );
+      expect((controller as any).taskService.createTask).toHaveBeenCalledWith(
+        taskData,
+        'user123'
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.CREATED);
+      expect(responseObject).toEqual({
+        success: true,
+        statusCode: HttpStatus.CREATED,
+        message: 'Task created successfully',
+        data: mockTask
+      });
+    });
 
-    expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.CREATED);
-    expect(responseObject).toEqual({
-      success: true,
-      statusCode: HttpStatus.CREATED,
-      message: 'Task created successfully',
-      data: mockTask
+    it('should return 401 if user is not authenticated', async () => {
+      mockRequest.user = undefined;
+      await controller.createTask(mockRequest as Request, mockResponse as Response);
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
     });
   });
 
-  it('should return 401 if user is not authenticated', async () => {
-    mockRequest.user = undefined;
+  describe('getTask', () => {
+    it('should successfully retrieve a task', async () => {
+      const mockTask = {
+        id: 'task123',
+        title: 'Test Task',
+        user: 'user123',
+        status: TaskStatus.NOT_DONE,
+        createdAt: new Date()
+      };
 
-    await controller.createTask(mockRequest as Request, mockResponse as Response);
+      (controller as any).taskService.getTask.mockResolvedValue(mockTask);
 
-    expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
-    expect(responseObject).toEqual({
-      success: false,
-      statusCode: HttpStatus.UNAUTHORIZED,
-      message: 'Unauthorized',
-      data: null
+      await controller.getTask(mockRequest as Request, mockResponse as Response);
+
+      expect((controller as any).taskService.getTask).toHaveBeenCalledWith(
+        'task123',
+        'user123'
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.OK);
+      expect(responseObject).toEqual({
+        success: true,
+        statusCode: HttpStatus.OK,
+        message: 'Task retrieved successfully',
+        data: mockTask
+      });
     });
-  });
 
-  it('should handle validation errors', async () => {
-    const error = new Error('Validation failed');
-    (controller as any).taskService.createTask.mockRejectedValue(error);
-    mockRequest.body = { invalid: 'data' };
+    it('should return 404 if task not found', async () => {
+      (controller as any).taskService.getTask.mockResolvedValue(null);
 
-    await controller.createTask(mockRequest as Request, mockResponse as Response);
+      await controller.getTask(mockRequest as Request, mockResponse as Response);
 
-    expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-    expect(responseObject).toEqual({
-      success: false,
-      statusCode: HttpStatus.BAD_REQUEST,
-      message: 'Validation failed',
-      data: null
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
+      expect(responseObject).toEqual({
+        success: false,
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Task not found',
+        data: null
+      });
+    });
+
+    it('should handle errors', async () => {
+      const error = new Error('Database error');
+      (controller as any).taskService.getTask.mockRejectedValue(error);
+
+      await controller.getTask(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+      expect(responseObject.message).toBe('Database error');
     });
   });
 });
