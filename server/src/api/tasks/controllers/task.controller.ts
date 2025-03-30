@@ -31,7 +31,6 @@ export class TaskController {
   }
 
   async createTask(req: Request, res: Response): Promise<void> {
-    console.log("req.body: ", req.body);
     try {
       if (!req.user) {
         this.sendResponse(res, {
@@ -152,7 +151,6 @@ export class TaskController {
         message: "Task deleted successfully",
       });
     } catch (error: any) {
-      console.log('error delete: ', error.message)
       this.sendResponse(res, {
         success: false,
         statusCode: HttpStatus.BAD_REQUEST,

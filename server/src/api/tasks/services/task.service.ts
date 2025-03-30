@@ -26,7 +26,6 @@ export class TaskService {
   }
 
   async createTask(data: CreateTaskDto, userId: string): Promise<TaskResponse> {
-    console.log('data: ', data);
     const taskData = {
       ...data,
       status: data.status || TaskStatus.NOT_DONE,
