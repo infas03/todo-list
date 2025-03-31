@@ -42,7 +42,11 @@ export const DeleteConfirmationForm = ({
 
   return (
     <>
-      <button className="text-red-500 hover:text-red-700" onClick={onOpen}>
+      <button
+        className="text-red-500 hover:text-red-700"
+        data-testid="open-delete-modal-button"
+        onClick={onOpen}
+      >
         {isDeleting ? <Spinner color="primary" /> : <DeleteIcon />}
       </button>
       <Modal isOpen={isOpen} placement="top-center" onOpenChange={onOpenChange}>
@@ -59,6 +63,7 @@ export const DeleteConfirmationForm = ({
               <ModalFooter>
                 <Button
                   color="danger"
+                  data-testid="cancel-delete-button"
                   disabled={isDeleting}
                   type="button"
                   variant="flat"
@@ -68,6 +73,7 @@ export const DeleteConfirmationForm = ({
                 </Button>
                 <Button
                   color="primary"
+                  data-testid="confirm-delete-button"
                   disabled={isDeleting}
                   isLoading={isDeleting}
                   onPress={handleDelete}

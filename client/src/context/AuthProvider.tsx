@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const dispatch = useDispatch();
 
   const userDetailsState = useSelector(
-    (state: RootState) => state.user.userDetails,
+    (state: RootState) => state.user?.userDetails,
   );
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);

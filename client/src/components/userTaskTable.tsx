@@ -96,7 +96,7 @@ export const UserTaskTable = () => {
 
   const handleCheckboxChange = async (
     taskId: string,
-    currentStatus: string
+    currentStatus: string,
   ) => {
     try {
       setIsLoadingStatus((prevState) => ({
@@ -187,6 +187,7 @@ export const UserTaskTable = () => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log("isLoadingDepend: ", isLoadingDepend);
   }, []);
   useEffect(() => {
@@ -194,11 +195,15 @@ export const UserTaskTable = () => {
   }, [isLoadingStatus]);
 
   return (
-    <div className="p-4 w-full">
-      <div className="flex justify-end items-center mb-4 text-sm">
+    <div className="p-4 w-full" data-testid="task-table-container">
+      <div
+        className="flex justify-end items-center mb-4 text-sm"
+        data-testid="task-table-controls"
+      >
         <div className="flex items-center gap-x-2">
           <Input
             className="w-48"
+            data-testid="search-input"
             name="search"
             placeholder="Search Task"
             type="text"
@@ -207,11 +212,12 @@ export const UserTaskTable = () => {
             onChange={handleSearchChange}
             onKeyDown={handleKeyPress}
           />
-          <TaskForm mode="create" />
+          <TaskForm data-testid="create-task-button" mode="create" />
           <span>Sort By:</span>
           <Select
             aria-label="Sort tasks by"
             className="w-32"
+            data-testid="sort-select"
             defaultSelectedKeys={["dueDate"]}
             onSelectionChange={(keys) => {
               const selectedKey = Array.from(keys)[0];
@@ -224,6 +230,7 @@ export const UserTaskTable = () => {
             ))}
           </Select>
           <FilterSwitch
+            data-testid="sort-order-switch"
             isSelected={sortOrder === "desc" ? true : false}
             onValueChange={handleFilterSwitch}
           />
@@ -231,7 +238,7 @@ export const UserTaskTable = () => {
       </div>
       <div className="flex flex-col items-center">
         {isLoading ? (
-          <div className="w-full">
+          <div className="w-full" data-testid="loading-skeleton">
             <EmployerTableSkeleton />
           </div>
         ) : (
@@ -239,6 +246,7 @@ export const UserTaskTable = () => {
             <Table
               aria-label="Example table with dynamic content"
               className="max-w-6xl"
+              data-testid="tasks-table"
             >
               <TableHeader columns={userTaskTableColumns}>
                 {(column) => (
