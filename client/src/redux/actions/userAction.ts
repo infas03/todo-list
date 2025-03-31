@@ -57,8 +57,8 @@ export const userLogin = (
       }
     } catch (error: any) {
       setIsLoading(false);
-      setError(error.response.data.message);
-      ToastBar.error(error.response.data.message);
+      setError(error.response?.data.message);
+      ToastBar?.error(error.response?.data.message);
     }
   };
 };
